@@ -103,14 +103,12 @@
   /* Categories row (single row, swipeable) */
   .cat-grid{
     display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
-    padding:2px 2px 4px;max-height:100px;opacity:1;
-    transition:max-height .28s ease, opacity .2s ease, padding .28s ease, margin .28s ease;
+    padding:2px 2px 4px;
+    transition:padding .28s ease;
     -ms-overflow-style:none;scrollbar-width:none;
   }
-  .home-panel.collapsed .cat-grid{
-    max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin:0;pointer-events:none;overflow:hidden;
-  }
-  .home-panel.collapsed{padding-bottom:14px;}
+  .home-panel.collapsed .cat-grid{padding-top:0;padding-bottom:0;}
+  .home-panel.collapsed{padding-bottom:12px;}
   .cat-grid::-webkit-scrollbar{display:none;}
   .cat-chip{
     flex:0 0 auto;text-align:center;cursor:pointer;background:transparent;border:none;padding:0;
@@ -119,7 +117,11 @@
   .cat-chip .emoji{
     width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 6px;
-    box-shadow:0 3px 8px rgba(0,0,0,.15);
+    box-shadow:0 3px 8px rgba(0,0,0,.15);overflow:hidden;
+    transition:width .25s ease, height .25s ease, margin .25s ease, opacity .2s ease, font-size .25s ease, box-shadow .25s ease;
+  }
+  .home-panel.collapsed .cat-chip .emoji{
+    width:0;height:0;margin:0;opacity:0;font-size:0;box-shadow:none;
   }
   .cat-chip .label{display:block;font-size:10.5px;font-weight:600;color:var(--ink);white-space:nowrap;}
   .cat-chip.active .emoji{outline:2px solid var(--ink);}
@@ -530,28 +532,42 @@ function render(){
 /* ---- HOME ---- */
 let homeScrollHandler = null;
 let homeLastScrollY = 0;
+let homeTicking = false;
+let homeIsCollapsed = false;
 function setupHomePanelFade(){
   const panel = document.querySelector('.home-panel');
   if(!panel) return;
   if(homeScrollHandler) window.removeEventListener('scroll', homeScrollHandler);
   homeLastScrollY = window.scrollY;
-  homeScrollHandler = () => {
+  homeIsCollapsed = false;
+  homeTicking = false;
+
+  const update = () => {
+    homeTicking = false;
     const p = document.querySelector('.home-panel');
     if(!p){ window.removeEventListener('scroll', homeScrollHandler); homeScrollHandler = null; return; }
-    const y = window.scrollY;
+    const y = Math.max(0, window.scrollY);
     const delta = y - homeLastScrollY;
-    if(y > 8) p.classList.add('scrolled'); else p.classList.remove('scrolled');
+    p.classList.toggle('scrolled', y > 8);
     if(y <= 8){
-      p.classList.remove('collapsed'); // arriba del todo: se ve completo
-    } else if(delta > 2){
-      p.classList.add('collapsed'); // bajando: se esconden los íconos
-    } else if(delta < -2){
-      p.classList.remove('collapsed'); // subiendo: reaparecen
+      homeIsCollapsed = false; // arriba del todo: se ve completo
+    } else if(delta > 10){
+      homeIsCollapsed = true; // bajando de forma sostenida: se esconden los íconos
+    } else if(delta < -10){
+      homeIsCollapsed = false; // subiendo de forma sostenida: reaparecen
     }
+    // deltas chicos (jitter de scroll) no cambian el estado, evita el temblor
+    p.classList.toggle('collapsed', homeIsCollapsed);
     homeLastScrollY = y;
   };
+
+  homeScrollHandler = () => {
+    if(homeTicking) return;
+    homeTicking = true;
+    requestAnimationFrame(update);
+  };
   window.addEventListener('scroll', homeScrollHandler, {passive:true});
-  homeScrollHandler();
+  update();
   // Al tocar/usar el panel vuelve a verse 100% opaco mientras se interactúa.
   const setActive = () => panel.classList.add('panel-active');
   const clearActive = () => panel.classList.remove('panel-active');
