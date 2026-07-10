@@ -1,6 +1,6 @@
 /* ==========================================================================
    VISIT POTRERO — datos del sitio
-   Generado por el panel de edición (admin.html) el 10/7/2026, 02:20:56.
+   Generado por el panel de edición (admin.html) el 10/7/2026, 03:15:27.
    Reemplazá el data.js de tu repositorio por este archivo para publicar los cambios.
 ========================================================================== */
 
