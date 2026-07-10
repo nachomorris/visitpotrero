@@ -136,12 +136,10 @@
   .edge-fade.on-panel.right{background:linear-gradient(to left, var(--primary) 40%, rgba(163,230,53,0));}
   .edge-fade.is-hidden{opacity:0;}
 
-  /* Envoltorio de los sliders horizontales (Descuentos / Lugares) para poder ponerles el degradado */
+  /* Envoltorio de los sliders horizontales (Descuentos / Lugares): degradado fijo, solo del lado derecho */
   .hscroll-wrap{position:relative;}
-  .hscroll-wrap .edge-fade{width:16px;opacity:0;}
-  .hscroll-wrap .edge-fade.left{background:linear-gradient(to right, var(--bg), rgba(247,248,243,0));}
+  .hscroll-wrap .edge-fade{width:16px;}
   .hscroll-wrap .edge-fade.right{background:linear-gradient(to left, var(--bg), rgba(247,248,243,0));}
-  .hscroll-wrap .edge-fade.is-visible{opacity:1;}
   .scroll-chevron{
     position:absolute;top:26px;transform:translateY(-50%);
     width:20px;height:30px;
@@ -555,27 +553,20 @@ function setupCatChevrons(){
   updateCatChevrons();
 }
 
-/* Degradado en los bordes de los sliders (Descuentos / Lugares): se ve solo mientras
-   se está deslizando, así nunca tapa a la card que quedó fija y visible en pantalla. */
-function setupEdgeFade(scrollId, fadeLeftId, fadeRightId){
+/* Degradado fijo del lado derecho de los sliders (Descuentos / Lugares): indica que hay
+   más cards para ver, y se esconde solo cuando llegás al final (no tapa nunca la
+   card visible porque no hay degradado del lado izquierdo). */
+function setupEdgeFade(scrollId, fadeRightId){
   const el = document.getElementById(scrollId);
-  const fadeLeft = document.getElementById(fadeLeftId);
   const fadeRight = document.getElementById(fadeRightId);
-  if(!el) return;
-  let hideTimer = null;
-  const onScroll = () => {
+  if(!el || !fadeRight) return;
+  const update = () => {
     const maxScroll = el.scrollWidth - el.clientWidth;
-    const atStart = el.scrollLeft <= 4;
     const atEnd = maxScroll <= 4 || el.scrollLeft >= maxScroll - 4;
-    if(fadeLeft) fadeLeft.classList.toggle('is-visible', !atStart);
-    if(fadeRight) fadeRight.classList.toggle('is-visible', !atEnd);
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      if(fadeLeft) fadeLeft.classList.remove('is-visible');
-      if(fadeRight) fadeRight.classList.remove('is-visible');
-    }, 250);
+    fadeRight.classList.toggle('is-hidden', atEnd);
   };
-  el.addEventListener('scroll', onScroll, {passive:true});
+  el.addEventListener('scroll', update, {passive:true});
+  update();
 }
 
 /* ============ SCROLL REVEAL ============ */
@@ -738,7 +729,6 @@ function renderHome(){
     <div class="section" style="margin-top:0;">
       <div class="section-head"><h2>Descuentos imperdibles</h2><span class="see-all" onclick="navigate('/buscar')">ver todos</span></div>
       <div class="hscroll-wrap">
-        <div class="edge-fade left is-hidden" id="promoFadeLeft"></div>
         <div class="hscroll" id="promoScroll">${highlights.map(promoCard).join('')}</div>
         <div class="edge-fade right" id="promoFadeRight"></div>
       </div>
@@ -748,7 +738,6 @@ function renderHome(){
       <div class="section-head"><h2>Lugares para visitar</h2></div>
       <div class="section-desc">Los rincones más lindos de Potrero</div>
       <div class="hscroll-wrap">
-        <div class="edge-fade left is-hidden" id="placeFadeLeft"></div>
         <div class="hscroll" id="placeScroll">${PLACES.map(placeCard).join('')}</div>
         <div class="edge-fade right" id="placeFadeRight"></div>
       </div>
@@ -762,8 +751,8 @@ function renderHome(){
   `;
   setupHomePanelFade();
   setupCatChevrons();
-  setupEdgeFade('promoScroll', 'promoFadeLeft', 'promoFadeRight');
-  setupEdgeFade('placeScroll', 'placeFadeLeft', 'placeFadeRight');
+  setupEdgeFade('promoScroll', 'promoFadeRight');
+  setupEdgeFade('placeScroll', 'placeFadeRight');
   initScrollReveal();
 }
 
