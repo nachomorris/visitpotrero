@@ -132,21 +132,22 @@
   .place-card .name{font-size:13.5px;font-weight:700;margin:3px 0 4px;}
   .place-card .desc{font-size:11.5px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 
-  /* Promo cards (estilo "descuentos imperdibles") */
+  /* Promo cards (idénticas a "Descuentos imperdibles" de PLIN: foto arriba, texto abajo) */
   .promo-card{
-    flex:0 0 auto;width:210px;height:150px;border-radius:18px;overflow:hidden;position:relative;
-    scroll-snap-align:start;box-shadow:var(--shadow);cursor:pointer;
+    flex:0 0 68%;border-radius:18px;overflow:hidden;background:var(--ink);color:#fff;
+    display:flex;flex-direction:column;scroll-snap-align:start;cursor:pointer;
   }
   .promo-card .promo-img{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;
+    height:150px;display:flex;align-items:center;justify-content:center;font-size:44px;
+    position:relative;overflow:hidden;
   }
-  .promo-card .promo-caption{
-    position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;color:#fff;
-    background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0));
+  .promo-card .promo-img img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   }
-  .promo-card .promo-name{font-size:13px;font-weight:700;margin-bottom:2px;}
-  .promo-card .promo-highlight{font-size:17px;font-weight:800;color:var(--primary);line-height:1.15;}
-  .promo-card .promo-sub{font-size:10.5px;opacity:.85;margin-top:2px;}
+  .promo-card .promo-caption{padding:10px 12px 12px;}
+  .promo-card .promo-name{font-size:11px;opacity:.8;margin-bottom:3px;}
+  .promo-card .promo-highlight{font-size:16px;font-weight:600;margin-bottom:2px;}
+  .promo-card .promo-sub{font-size:11px;opacity:.9;}
 
   /* Business list */
   .biz-list{display:flex;flex-direction:column;gap:10px;}
@@ -406,11 +407,21 @@ function bizCard(b){
   </div>`;
 }
 
-function promoCard(b){
+// Fotos de ejemplo (mismo estilo que usa PLIN en sus tarjetas) para previsualizar el diseño.
+// Reemplazá cada "photo" en BUSINESSES por la foto real del comercio cuando la tengas.
+const SAMPLE_PHOTOS = [
+  'https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=800',
+];
+
+function promoCard(b, i){
   const c = cat(b.category);
   const highlight = b.top ? '★ Top de Potrero' : (b.featured ? '☆ Recomendado' : c.label);
+  const photo = b.photo || SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
   return `<div class="promo-card" onclick="navigate('/comercio/${b.id}')">
-    <div class="promo-img" style="background:${c.color}">${c.emoji}</div>
+    <div class="promo-img" style="background:${c.color}">
+      ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
+    </div>
     <div class="promo-caption">
       <div class="promo-name">${b.name}</div>
       <div class="promo-highlight">${highlight}</div>
@@ -418,6 +429,8 @@ function promoCard(b){
     </div>
   </div>`;
 }
+/* Nota: estructura de tarjeta calcada de .discount-card de PLIN
+   (business chico arriba, título grande, subtítulo chico, foto 150px arriba). */
 
 function placeCard(p){
   return `<div class="place-card" onclick="navigate('/lugares/${p.id}')">
@@ -506,7 +519,7 @@ function renderHome(){
     </div>
 
     <div class="section" style="margin-top:0;">
-      <div class="section-head"><h2>Destacados imperdibles</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
+      <div class="section-head"><h2>Descuentos imperdibles</h2><span class="see-all" onclick="navigate('/buscar')">ver todos</span></div>
       <div class="hscroll">${highlights.map(promoCard).join('')}</div>
     </div>
 
