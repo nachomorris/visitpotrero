@@ -130,9 +130,18 @@
     position:absolute;top:0;bottom:0;width:28px;pointer-events:none;
     transition:opacity .2s ease;z-index:1;
   }
-  .edge-fade.left{left:0;background:linear-gradient(to right, var(--primary) 40%, rgba(163,230,53,0));}
-  .edge-fade.right{right:0;background:linear-gradient(to left, var(--primary) 40%, rgba(163,230,53,0));}
+  .edge-fade.left{left:0;background:linear-gradient(to right, var(--bg) 30%, rgba(247,248,243,0));}
+  .edge-fade.right{right:0;background:linear-gradient(to left, var(--bg) 30%, rgba(247,248,243,0));}
+  .edge-fade.on-panel.left{background:linear-gradient(to right, var(--primary) 40%, rgba(163,230,53,0));}
+  .edge-fade.on-panel.right{background:linear-gradient(to left, var(--primary) 40%, rgba(163,230,53,0));}
   .edge-fade.is-hidden{opacity:0;}
+
+  /* Envoltorio de los sliders horizontales (Descuentos / Lugares) para poder ponerles el degradado */
+  .hscroll-wrap{position:relative;}
+  .hscroll-wrap .edge-fade{width:16px;opacity:0;}
+  .hscroll-wrap .edge-fade.left{background:linear-gradient(to right, var(--bg), rgba(247,248,243,0));}
+  .hscroll-wrap .edge-fade.right{background:linear-gradient(to left, var(--bg), rgba(247,248,243,0));}
+  .hscroll-wrap .edge-fade.is-visible{opacity:1;}
   .scroll-chevron{
     position:absolute;top:26px;transform:translateY(-50%);
     width:20px;height:30px;
@@ -546,6 +555,29 @@ function setupCatChevrons(){
   updateCatChevrons();
 }
 
+/* Degradado en los bordes de los sliders (Descuentos / Lugares): se ve solo mientras
+   se está deslizando, así nunca tapa a la card que quedó fija y visible en pantalla. */
+function setupEdgeFade(scrollId, fadeLeftId, fadeRightId){
+  const el = document.getElementById(scrollId);
+  const fadeLeft = document.getElementById(fadeLeftId);
+  const fadeRight = document.getElementById(fadeRightId);
+  if(!el) return;
+  let hideTimer = null;
+  const onScroll = () => {
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = maxScroll <= 4 || el.scrollLeft >= maxScroll - 4;
+    if(fadeLeft) fadeLeft.classList.toggle('is-visible', !atStart);
+    if(fadeRight) fadeRight.classList.toggle('is-visible', !atEnd);
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if(fadeLeft) fadeLeft.classList.remove('is-visible');
+      if(fadeRight) fadeRight.classList.remove('is-visible');
+    }, 250);
+  };
+  el.addEventListener('scroll', onScroll, {passive:true});
+}
+
 /* ============ SCROLL REVEAL ============ */
 let revealObserver = null;
 function initScrollReveal(){
@@ -691,27 +723,35 @@ function renderHome(){
         <span>🔎</span><span style="color:var(--muted);font-size:14px;">Buscá tu comercio</span>
       </div>
       <div class="cat-grid-wrap">
-        <div class="edge-fade left is-hidden" id="catFadeLeft"></div>
+        <div class="edge-fade on-panel left is-hidden" id="catFadeLeft"></div>
         <button class="scroll-chevron left is-hidden" id="catChevronLeft" onclick="scrollCatGrid(-1)" aria-label="Categorías anteriores"></button>
         <div class="cat-grid" id="catGrid">
           ${CATEGORIES.map(c=>`<div class="cat-chip" onclick="navigate('/categoria/${c.slug}')">
             <div class="emoji">${c.emoji}</div><span class="label">${c.label}</span>
           </div>`).join('')}
         </div>
-        <div class="edge-fade right" id="catFadeRight"></div>
+        <div class="edge-fade on-panel right" id="catFadeRight"></div>
         <button class="scroll-chevron right" id="catChevronRight" onclick="scrollCatGrid(1)" aria-label="Más categorías"></button>
       </div>
     </div>
 
     <div class="section" style="margin-top:0;">
       <div class="section-head"><h2>Descuentos imperdibles</h2><span class="see-all" onclick="navigate('/buscar')">ver todos</span></div>
-      <div class="hscroll">${highlights.map(promoCard).join('')}</div>
+      <div class="hscroll-wrap">
+        <div class="edge-fade left is-hidden" id="promoFadeLeft"></div>
+        <div class="hscroll" id="promoScroll">${highlights.map(promoCard).join('')}</div>
+        <div class="edge-fade right" id="promoFadeRight"></div>
+      </div>
     </div>
 
     <div class="section">
       <div class="section-head"><h2>Lugares para visitar</h2></div>
       <div class="section-desc">Los rincones más lindos de Potrero</div>
-      <div class="hscroll">${PLACES.map(placeCard).join('')}</div>
+      <div class="hscroll-wrap">
+        <div class="edge-fade left is-hidden" id="placeFadeLeft"></div>
+        <div class="hscroll" id="placeScroll">${PLACES.map(placeCard).join('')}</div>
+        <div class="edge-fade right" id="placeFadeRight"></div>
+      </div>
     </div>
 
     <div class="section">
@@ -722,6 +762,8 @@ function renderHome(){
   `;
   setupHomePanelFade();
   setupCatChevrons();
+  setupEdgeFade('promoScroll', 'promoFadeLeft', 'promoFadeRight');
+  setupEdgeFade('placeScroll', 'placeFadeLeft', 'placeFadeRight');
   initScrollReveal();
 }
 
