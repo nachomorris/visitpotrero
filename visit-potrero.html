@@ -67,6 +67,16 @@
     margin:-16px -16px 24px;padding:14px 16px 18px;
     position:sticky;top:0;z-index:20;
     box-shadow:0 4px 16px rgba(0,0,0,.1);
+    transition:background-color .25s ease, -webkit-backdrop-filter .25s ease, backdrop-filter .25s ease;
+  }
+  .home-panel.scrolled{
+    background:rgba(163,230,53,.7);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    backdrop-filter:blur(14px) saturate(160%);
+  }
+  .home-panel.scrolled.panel-active{
+    background:var(--primary);
+    -webkit-backdrop-filter:none;backdrop-filter:none;
   }
   .panel-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .panel-topbar .brand{
@@ -219,17 +229,19 @@
     pointer-events:none;
   }
   nav.bottomnav .inner{
-    display:flex;gap:6px;border-radius:22px;
-    padding:8px 10px;pointer-events:auto;
-    background:rgba(17,17,17,.4);
+    display:flex;gap:4px;border-radius:22px;max-width:100%;
+    padding:8px 8px;pointer-events:auto;overflow-x:auto;
+    background:rgba(17,17,17,.5);
     -webkit-backdrop-filter:blur(20px) saturate(180%);
     backdrop-filter:blur(20px) saturate(180%);
     border:1px solid rgba(255,255,255,.14);
     box-shadow:0 10px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.12);
+    -ms-overflow-style:none;scrollbar-width:none;
   }
+  nav.bottomnav .inner::-webkit-scrollbar{display:none;}
   nav.bottomnav a{
-    flex:0 0 60px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px;
-    font-size:10px;color:#fff;opacity:.62;font-weight:600;cursor:pointer;
+    flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px 2px;
+    font-size:10px;color:#fff;opacity:.62;font-weight:600;cursor:pointer;white-space:nowrap;
     text-shadow:0 1px 3px rgba(0,0,0,.4);
   }
   nav.bottomnav a.active{opacity:1;}
@@ -511,6 +523,27 @@ function render(){
 }
 
 /* ---- HOME ---- */
+let homeScrollHandler = null;
+function setupHomePanelFade(){
+  const panel = document.querySelector('.home-panel');
+  if(!panel) return;
+  if(homeScrollHandler) window.removeEventListener('scroll', homeScrollHandler);
+  homeScrollHandler = () => {
+    const p = document.querySelector('.home-panel');
+    if(!p){ window.removeEventListener('scroll', homeScrollHandler); homeScrollHandler = null; return; }
+    if(window.scrollY > 8) p.classList.add('scrolled'); else p.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', homeScrollHandler, {passive:true});
+  homeScrollHandler();
+  // Al tocar/usar el panel vuelve a verse 100% opaco mientras se interactúa.
+  const setActive = () => panel.classList.add('panel-active');
+  const clearActive = () => panel.classList.remove('panel-active');
+  panel.addEventListener('pointerdown', setActive);
+  panel.addEventListener('pointerup', () => setTimeout(clearActive, 250));
+  panel.addEventListener('pointerleave', clearActive);
+  panel.addEventListener('pointercancel', clearActive);
+}
+
 function renderHome(){
   hideTopbar();
   setBottomnav('home');
@@ -549,6 +582,7 @@ function renderHome(){
       <div class="biz-list">${BUSINESSES.slice(0,8).map(bizCard).join('')}</div>
     </div>
   `;
+  setupHomePanelFade();
 }
 
 /* ---- CATEGORIA ---- */
