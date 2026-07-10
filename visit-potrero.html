@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Visit Potrero — Guía de Potrero de los Funes</title>
+<meta name="description" content="Guía de experiencias, alojamientos, restaurantes y comercios de Potrero de los Funes, San Luis, Argentina.">
+<meta name="theme-color" content="#f97316">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --primary:#f97316;
+    --primary-dark:#c2410c;
+    --primary-light:#ffedd5;
+    --accent:#0ea5e9;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --bg:#fbf8f5;
+    --card:#ffffff;
+    --border:#eee2d8;
+    --radius:18px;
+    --shadow:0 4px 18px rgba(31,41,55,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:76px;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;}
+
+  /* App shell */
+  .app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;}
+
+  header.topbar{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(135deg,var(--primary),#fb923c);
+    color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  header.topbar .logo{
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;
+  }
+  header.topbar .title{font-weight:800;font-size:16px;line-height:1.1;}
+  header.topbar .sub{font-size:11px;opacity:.9;font-weight:500;}
+  header.topbar .back{
+    background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:10px;
+    font-size:16px;cursor:pointer;flex:none;
+  }
+
+  main{padding:16px 16px 8px;}
+
+  /* Hero */
+  .hero{
+    border-radius:22px;overflow:hidden;position:relative;color:#fff;
+    background:linear-gradient(135deg,#fb923c,#ea580c 60%,#c2410c);
+    padding:26px 20px 60px;margin-bottom:-42px;
+  }
+  .hero .eyebrow{font-size:12px;opacity:.9;font-weight:600;letter-spacing:.03em;}
+  .hero h1{font-size:26px;margin:6px 0 6px;font-weight:800;}
+  .hero p{margin:0;font-size:13.5px;opacity:.95;}
+
+  .section{margin:52px 0 26px;}
+  .section:first-of-type{margin-top:0;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+  .section-head h2{font-size:17px;margin:0;font-weight:700;}
+  .section-head .see-all{font-size:12.5px;color:var(--primary-dark);font-weight:600;}
+  .section-desc{font-size:12.5px;color:var(--muted);margin:-8px 0 12px;}
+
+  /* Categories grid */
+  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .cat-chip{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:12px 6px;text-align:center;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .cat-chip .emoji{font-size:22px;}
+  .cat-chip .label{display:block;font-size:10.5px;margin-top:6px;font-weight:600;color:var(--ink);}
+  .cat-chip.active{outline:2px solid var(--primary);}
+
+  /* Map CTA */
+  .map-cta{
+    display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;border-radius:20px;
+    padding:16px;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .map-cta .emoji{font-size:30px;}
+  .map-cta .t1{font-size:11px;color:#fbbf24;font-weight:700;letter-spacing:.03em;}
+  .map-cta .t2{font-size:15px;font-weight:700;margin:2px 0;}
+  .map-cta .t3{font-size:12px;color:#cbd5e1;}
+
+  /* Horizontal scroller */
+  .hscroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-snap-type:x mandatory;}
+  .hscroll::-webkit-scrollbar{display:none;}
+  .place-card{
+    flex:0 0 auto;width:200px;background:var(--card);border-radius:18px;overflow:hidden;
+    box-shadow:var(--shadow);scroll-snap-align:start;border:1px solid var(--border);
+  }
+  .place-card .img{height:110px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;}
+  .place-card .body{padding:10px 12px 14px;}
+  .place-card .tag{font-size:10px;color:var(--primary-dark);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+  .place-card .name{font-size:13.5px;font-weight:700;margin:3px 0 4px;}
+  .place-card .desc{font-size:11.5px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* Business list */
+  .biz-list{display:flex;flex-direction:column;gap:10px;}
+  .biz-card{
+    display:flex;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:10px;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .biz-card .thumb{
+    width:64px;height:64px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:24px;color:#fff;
+  }
+  .biz-card .info{flex:1;min-width:0;}
+  .biz-card .badges{display:flex;gap:6px;align-items:center;margin-bottom:2px;flex-wrap:wrap;}
+  .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;}
+  .badge.top{background:#fef3c7;color:#b45309;}
+  .badge.featured{background:#fce7f3;color:#a21caf;}
+  .badge.open{background:#dcfce7;color:#15803d;}
+  .badge.closed{background:#fee2e2;color:#b91c1c;}
+  .biz-card .name{font-size:14px;font-weight:700;margin:0 0 2px;}
+  .biz-card .cat{font-size:11.5px;color:var(--primary-dark);font-weight:600;}
+  .biz-card .addr{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* Search bar */
+  .searchbar{
+    display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:10px 14px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .searchbar input{border:none;outline:none;font-size:14px;flex:1;background:transparent;font-family:inherit;}
+  .filter-row{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;}
+  .filter-pill{
+    flex:none;border:1px solid var(--border);background:var(--card);border-radius:20px;padding:7px 14px;
+    font-size:12px;font-weight:600;cursor:pointer;color:var(--ink);white-space:nowrap;
+  }
+  .filter-pill.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+  /* Detail page */
+  .detail-hero{height:180px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:56px;color:#fff;margin-bottom:16px;}
+  .detail-title{font-size:21px;font-weight:800;margin:0 0 4px;}
+  .detail-cat{font-size:13px;color:var(--primary-dark);font-weight:700;margin-bottom:10px;}
+  .detail-badges{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .detail-block{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .detail-block h3{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin:0 0 6px;}
+  .detail-block p{margin:0;font-size:14px;line-height:1.5;}
+  .detail-row{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:6px 0;}
+  .detail-row .ic{width:26px;text-align:center;font-size:15px;}
+  .cta-btns{display:flex;gap:10px;margin-top:6px;}
+  .cta-btns a{flex:1;text-align:center;padding:12px;border-radius:14px;font-weight:700;font-size:13px;}
+  .cta-btns .wsp{background:#25D366;color:#fff;}
+  .cta-btns .map{background:var(--ink);color:#fff;}
+
+  /* Events / novedades */
+  .event-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  .event-card .date{font-size:11px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;}
+  .event-card h3{font-size:14.5px;margin:4px 0 4px;}
+  .event-card p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.4;}
+
+  /* Map */
+  #mapview{height:calc(100vh - 200px);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
+  .leaflet-popup-content{font-family:'Poppins',sans-serif;font-size:13px;}
+  .popup-link{color:var(--primary-dark);font-weight:700;font-size:12px;display:inline-block;margin-top:4px;}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px;}
+
+  /* Bottom nav */
+  nav.bottomnav{
+    position:fixed;bottom:0;left:0;right:0;z-index:30;
+    background:#fff;border-top:1px solid var(--border);
+    display:flex;justify-content:center;
+    box-shadow:0 -2px 12px rgba(0,0,0,.06);
+  }
+  nav.bottomnav .inner{max-width:520px;width:100%;display:flex;}
+  nav.bottomnav a{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 8px;
+    font-size:10.5px;color:var(--muted);font-weight:600;
+  }
+  nav.bottomnav a.active{color:var(--primary-dark);}
+  nav.bottomnav a .ic{font-size:19px;}
+
+  @media (min-width:521px){
+    .app{border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar" id="topbar"></header>
+  <main id="view"></main>
+  <nav class="bottomnav">
+    <div class="inner" id="bottomnav"></div>
+  </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ============ DATA ============ */
+const CATEGORIES = [
+  {slug:'alojamiento', label:'Alojamiento', emoji:'🏨', color:'#0ea5e9'},
+  {slug:'gastronomia', label:'Gastronomía', emoji:'🍽️', color:'#f97316'},
+  {slug:'turismo', label:'Turismo', emoji:'📸', color:'#16a34a'},
+  {slug:'salud', label:'Salud', emoji:'💙', color:'#2563eb'},
+  {slug:'comercios', label:'Comercios', emoji:'🛍️', color:'#db2777'},
+  {slug:'servicios', label:'Servicios', emoji:'🔧', color:'#71717a'},
+  {slug:'deportes', label:'Deportes', emoji:'🏋️', color:'#ca8a04'},
+  {slug:'entretenimiento', label:'Entretenimiento', emoji:'🎭', color:'#7c3aed'},
+];
+const CENTER = [-33.2333, -66.2650]; // Potrero de los Funes, San Luis
+
+function cat(slug){ return CATEGORIES.find(c=>c.slug===slug) || CATEGORIES[0]; }
+function jitter(base, i, scale){ return base + ((i*37 % 100)/100 - .5) * scale; }
+
+const PLACES = [ // "lugares para visitar" - atractivos, no son comercios
+  {id:'paseo-del-lago', name:'Paseo del Lago', type:'Peatonal', emoji:'🌉',
+   desc:'Recorrido peatonal con miradores y rampas para personas con discapacidad, y un puente flotante que comunica con el Parque Nativo.',
+   lat: CENTER[0]+0.004, lng: CENTER[1]-0.006},
+  {id:'paseo-artesanos', name:'Paseo de Artesanos Laura Amaya', type:'Paseo', emoji:'🎨',
+   desc:'Feria de artesanos con productos regionales, tejidos y artesanías locales, en pleno centro de Potrero.',
+   lat: CENTER[0]-0.002, lng: CENTER[1]+0.003},
+  {id:'parque-salagria', name:'Parque Recreativo La Salagria', type:'Parque recreativo', emoji:'🌳',
+   desc:'Propuestas pensadas para el descanso, la recreación y los encuentros en familia o con amigos, a orillas del dique.',
+   lat: CENTER[0]+0.009, lng: CENTER[1]+0.008},
+  {id:'quebrada-condores', name:'Quebrada de los Cóndores', type:'Fotográfico', emoji:'🦅',
+   desc:'Ingreso y bienvenida al valle, con un mirador ideal para fotografía y contacto con las sierras.',
+   lat: CENTER[0]-0.011, lng: CENTER[1]-0.004},
+  {id:'dique-potrero', name:'Dique Potrero de los Funes', type:'Naturaleza', emoji:'💧',
+   desc:'El embalse que da nombre a la localidad. Apto para deportes náuticos, pesca y paseos en la costanera.',
+   lat: CENTER[0]+0.001, lng: CENTER[1]-0.011},
+];
+
+const BUSINESSES = [
+  // Alojamiento
+  {id:'complejo-retana', name:'Complejo Retana - Cabañas', category:'alojamiento', address:'Las Catitas y Reina Mora, Potrero de los Funes, San Luis',
+   desc:'Cabañas familiares totalmente equipadas, rodeadas de naturaleza serrana, ideales para descansar en pareja o en familia.',
+   phone:'+54 9 266 000-0001', hours:'Recepción 8:00 a 22:00', open:true, top:false, featured:false},
+  {id:'lunas-y-soles', name:'Lunas y Soles - Cabañas', category:'alojamiento', address:'Santa Rita 559, Potrero de los Funes, San Luis',
+   desc:'Cabañas de diseño con vista a las sierras, pileta de uso común y desayuno regional incluido.',
+   phone:'+54 9 266 000-0002', hours:'Recepción 9:00 a 21:00', open:true, top:true, featured:false},
+  {id:'agua-clara-parador', name:'Agua Clara - Parador', category:'alojamiento', address:'Camino Mirador, Potrero de los Funes, San Luis',
+   desc:'Parador con habitaciones frente al lago y acceso directo a la costa para disfrutar del atardecer.',
+   phone:'+54 9 266 000-0003', hours:'Abierto todos los días', open:false, top:false, featured:false},
+
+  // Gastronomía
+  {id:'lo-de-vito', name:'Lo de Vito', category:'gastronomia', address:'Los Paraísos 3171, Potrero de los Funes, San Luis',
+   desc:'Parrilla y cocina regional con vista panorámica al dique. Uno de los clásicos de Potrero.',
+   phone:'+54 9 266 000-0004', hours:'12:00–16:00 y 20:00–00:00', open:false, top:true, featured:true},
+  {id:'la-curva-rotiseria', name:'La Curva Rotisería - Kiosco', category:'gastronomia', address:'Av. del Circuito 2120, Potrero de los Funes, San Luis',
+   desc:'Rotisería y kiosco de paso, comidas caseras para llevar y despensa básica.',
+   phone:'+54 9 266 000-0005', hours:'8:00 a 23:00', open:false, top:false, featured:false},
+  {id:'puerto-seco-bar', name:'Puerto Seco Bar', category:'gastronomia', address:'Av. del Circuito s/n, Potrero de los Funes, San Luis',
+   desc:'Bar de tragos y picadas frente al lago, con música en vivo los fines de semana.',
+   phone:'+54 9 266 000-0006', hours:'18:00 a 02:00', open:true, top:false, featured:false},
+
+  // Turismo
+  {id:'agua-clara-cabalgatas', name:'Agua Clara - Travesías y Cabalgatas', category:'turismo', address:'Camino Mirador, Potrero de los Funes, San Luis',
+   desc:'Cabalgatas y travesías guiadas por las sierras, para todas las edades y niveles.',
+   phone:'+54 9 266 000-0007', hours:'9:00 a 18:00', open:true, top:false, featured:false},
+  {id:'la-salagria-turismo', name:'La Salagria', category:'turismo', address:'Camino Mirador, Potrero de los Funes, San Luis',
+   desc:'Paseos náuticos y actividades recreativas en el dique, alquiler de kayaks y botes a pedal.',
+   phone:'+54 9 266 000-0008', hours:'10:00 a 19:00', open:false, top:false, featured:false},
+  {id:'potrero-bike-rental', name:'Potrero Bike Rental', category:'turismo', address:'Av. del Circuito 900, Potrero de los Funes, San Luis',
+   desc:'Alquiler de bicicletas para recorrer el circuito del lago a tu ritmo.',
+   phone:'+54 9 266 000-0009', hours:'9:00 a 20:00', open:true, top:false, featured:false},
+
+  // Salud
+  {id:'farmacia-potrero', name:'Farmacia Potrero', category:'salud', address:'Av. del Circuito 450, Potrero de los Funes, San Luis',
+   desc:'Farmacia con entrega a domicilio y guardia rotativa en temporada alta.',
+   phone:'+54 9 266 000-0010', hours:'8:00 a 21:00', open:true, top:false, featured:false},
+  {id:'centro-salud', name:'Centro de Salud Comunitario', category:'salud', address:'Calle Los Cardones s/n, Potrero de los Funes, San Luis',
+   desc:'Atención primaria, vacunación y guardia para urgencias menores.',
+   phone:'+54 9 266 000-0011', hours:'7:00 a 20:00', open:true, top:false, featured:false},
+
+  // Comercios
+  {id:'fuerza-12-store', name:'Fuerza 12 Store - Gym', category:'comercios', address:'Avenida Circuito y Las Higueras, Potrero de los Funes, San Luis',
+   desc:'Indumentaria deportiva, suplementos y accesorios de entrenamiento.',
+   phone:'+54 9 266 000-0012', hours:'9:00 a 20:00', open:true, top:false, featured:false},
+  {id:'almacen-sierras', name:'Almacén de las Sierras', category:'comercios', address:'Calle Real 210, Potrero de los Funes, San Luis',
+   desc:'Productos regionales, dulces artesanales y souvenirs de la zona.',
+   phone:'+54 9 266 000-0013', hours:'9:00 a 21:00', open:false, top:false, featured:false},
+
+  // Servicios
+  {id:'gomeria-circuito', name:'Gomería El Circuito', category:'servicios', address:'Av. del Circuito 1500, Potrero de los Funes, San Luis',
+   desc:'Reparación de neumáticos, auxilio mecánico y service básico.',
+   phone:'+54 9 266 000-0014', hours:'8:00 a 19:00', open:true, top:false, featured:false},
+  {id:'inmobiliaria-potrero', name:'Inmobiliaria Potrero', category:'servicios', address:'Calle Real 88, Potrero de los Funes, San Luis',
+   desc:'Venta y alquiler de propiedades, cabañas y terrenos en la zona.',
+   phone:'+54 9 266 000-0015', hours:'9:00 a 18:00', open:true, top:false, featured:false},
+
+  // Deportes
+  {id:'nautica-potrero', name:'Náutica Potrero', category:'deportes', address:'Costanera del Lago, Potrero de los Funes, San Luis',
+   desc:'Alquiler de kayaks, tablas SUP y equipos náuticos para disfrutar del dique.',
+   phone:'+54 9 266 000-0016', hours:'9:00 a 19:00', open:true, top:true, featured:false},
+  {id:'fuerza-12-deportes', name:'Fuerza 12 - Entrenamiento Funcional', category:'deportes', address:'Avenida Circuito y Las Higueras, Potrero de los Funes, San Luis',
+   desc:'Clases grupales de entrenamiento funcional al aire libre con vista al lago.',
+   phone:'+54 9 266 000-0017', hours:'7:00 a 21:00', open:true, top:false, featured:false},
+
+  // Entretenimiento
+  {id:'cine-aire-libre', name:'Cine al Aire Libre La Salagria', category:'entretenimiento', address:'Parque Recreativo La Salagria, Potrero de los Funes, San Luis',
+   desc:'Proyecciones de cine bajo las estrellas en temporada de verano.',
+   phone:'+54 9 266 000-0018', hours:'Vie y Sáb 21:00', open:false, top:false, featured:true},
+  {id:'boliche-latitud', name:'Boliche Latitud', category:'entretenimiento', address:'Av. del Circuito 3000, Potrero de los Funes, San Luis',
+   desc:'Música en vivo y pista de baile los fines de semana en temporada alta.',
+   phone:'+54 9 266 000-0019', hours:'Vie y Sáb 00:00 a 05:00', open:false, top:false, featured:false},
+];
+
+// generate coordinates for businesses (jittered around center)
+BUSINESSES.forEach((b,i)=>{
+  b.lat = jitter(CENTER[0], i, 0.03);
+  b.lng = jitter(CENTER[1], i+7, 0.03);
+});
+
+const EVENTS = [
+  {date:'12 Jul 2026', title:'Feria de Artesanos de Invierno', desc:'Artesanos locales exponen sus productos en el Paseo Laura Amaya, todo el fin de semana.'},
+  {date:'18 Jul 2026', title:'Apertura de temporada de deportes náuticos', desc:'La Salagria y Náutica Potrero habilitan alquiler de kayaks y SUP para el receso invernal.'},
+  {date:'25 Jul 2026', title:'Festival Gastronómico Sabores de Potrero', desc:'Los restaurantes de la zona ofrecen menúes especiales durante todo el fin de semana largo.'},
+];
+const NOVEDADES = [
+  {date:'05 Jul 2026', title:'Nueva señalética en el Paseo del Lago', desc:'Se incorporaron carteles informativos y de accesibilidad en todo el recorrido peatonal.'},
+  {date:'28 Jun 2026', title:'CCTA suma nuevos comercios adheridos', desc:'Se incorporaron 6 nuevos comercios a la guía oficial de Potrero de los Funes.'},
+  {date:'15 Jun 2026', title:'Mejoras en la costanera', desc:'Trabajos de mantenimiento y nueva iluminación en el sector de la Salagria.'},
+];
+
+/* ============ HELPERS ============ */
+function allItems(){
+  return BUSINESSES.map(b=>({...b, kind:'comercio'}));
+}
+function getBusiness(id){ return BUSINESSES.find(b=>b.id===id); }
+function getPlace(id){ return PLACES.find(p=>p.id===id); }
+
+function bizThumb(b, size){
+  const c = cat(b.category);
+  return `<div class="thumb" style="background:${c.color};width:${size||64}px;height:${size||64}px;font-size:${size?Math.round(size*0.4):24}px;">${c.emoji}</div>`;
+}
+
+function badgesFor(b){
+  let h = '';
+  if(b.top) h += `<span class="badge top">★ TOP</span>`;
+  if(b.featured) h += `<span class="badge featured">☆ Destacado</span>`;
+  h += b.open ? `<span class="badge open">● Abierto</span>` : `<span class="badge closed">● Cerrado</span>`;
+  return h;
+}
+
+function bizCard(b){
+  return `<div class="biz-card" onclick="navigate('/comercio/${b.id}')">
+    ${bizThumb(b)}
+    <div class="info">
+      <div class="badges">${badgesFor(b)}</div>
+      <div class="name">${b.name}</div>
+      <div class="cat">${cat(b.category).label}</div>
+      <div class="addr">📍 ${b.address}</div>
+    </div>
+  </div>`;
+}
+
+function placeCard(p){
+  const c = {color:'#16a34a'};
+  return `<div class="place-card" onclick="navigate('/lugares/${p.id}')">
+    <div class="img" style="background:${c.color}">${p.emoji}</div>
+    <div class="body">
+      <div class="tag">${p.type}</div>
+      <div class="name">${p.name}</div>
+      <div class="desc">${p.desc}</div>
+    </div>
+  </div>`;
+}
+
+/* ============ ROUTER ============ */
+function navigate(path){ location.hash = '#' + path; }
+window.addEventListener('hashchange', render);
+window.addEventListener('DOMContentLoaded', render);
+
+function parseRoute(){
+  let h = location.hash.replace(/^#/,'') || '/';
+  const parts = h.split('/').filter(Boolean);
+  return parts;
+}
+
+function setTopbar({title, sub, back}){
+  const tb = document.getElementById('topbar');
+  tb.innerHTML = `
+    ${back ? `<button class="back" onclick="history.back()">←</button>` : `<div class="logo">🏔️</div>`}
+    <div>
+      <div class="title">${title}</div>
+      ${sub ? `<div class="sub">${sub}</div>` : ''}
+    </div>`;
+}
+
+function setBottomnav(active){
+  const items = [
+    {key:'home', path:'/', ic:'🏠', label:'Inicio'},
+    {key:'mapa', path:'/mapa', ic:'🗺️', label:'Mapa'},
+    {key:'eventos', path:'/eventos', ic:'🎉', label:'Eventos'},
+    {key:'novedades', path:'/novedades', ic:'📰', label:'Novedades'},
+  ];
+  document.getElementById('bottomnav').innerHTML = items.map(i=>
+    `<a class="${active===i.key?'active':''}" onclick="navigate('${i.path}')"><span class="ic">${i.ic}</span>${i.label}</a>`
+  ).join('');
+}
+
+function render(){
+  const parts = parseRoute();
+  window.scrollTo(0,0);
+  if(parts.length===0){ return renderHome(); }
+  if(parts[0]==='categoria') return renderCategoria(parts[1]);
+  if(parts[0]==='buscar') return renderBuscar();
+  if(parts[0]==='mapa') return renderMapa();
+  if(parts[0]==='eventos') return renderEventos();
+  if(parts[0]==='novedades') return renderNovedades();
+  if(parts[0]==='comercio') return renderComercio(parts[1]);
+  if(parts[0]==='lugares') return renderLugar(parts[1]);
+  return renderHome();
+}
+
+/* ---- HOME ---- */
+function renderHome(){
+  setTopbar({title:'Visit Potrero', sub:'Guía de Potrero de los Funes'});
+  setBottomnav('home');
+  const featured = BUSINESSES.filter(b=>b.featured);
+  const top = BUSINESSES.filter(b=>b.top);
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <div class="hero">
+      <div class="eyebrow">VISIT POTRERO · SAN LUIS, ARGENTINA</div>
+      <h1>Potrero de los Funes</h1>
+      <p>Descubrí dónde hospedarte, comer y qué hacer hoy.</p>
+    </div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="section-head"><h2>Categorías</h2><span class="see-all" onclick="navigate('/buscar')">Ver todas</span></div>
+      <div class="cat-grid">
+        ${CATEGORIES.map(c=>`<div class="cat-chip" onclick="navigate('/categoria/${c.slug}')">
+          <div class="emoji">${c.emoji}</div><span class="label">${c.label}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="map-cta" onclick="navigate('/mapa')">
+        <div class="emoji">🗺️</div>
+        <div>
+          <div class="t1">MAPA INTERACTIVO</div>
+          <div class="t2">Explorá Potrero</div>
+          <div class="t3">Encontrá comercios, gastronomía, alojamientos y lugares cerca tuyo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Lugares para visitar</h2></div>
+      <div class="section-desc">Los rincones más lindos de Potrero</div>
+      <div class="hscroll">${PLACES.map(placeCard).join('')}</div>
+    </div>
+
+    ${featured.length ? `
+    <div class="section">
+      <div class="section-head"><h2>Destacados</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
+      <div class="biz-list">${featured.map(bizCard).join('')}</div>
+    </div>` : ''}
+
+    <div class="section">
+      <div class="section-head"><h2>Todos los comercios</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
+      <div class="section-desc">Descubrí negocios locales recomendados.</div>
+      <div class="biz-list">${BUSINESSES.slice(0,8).map(bizCard).join('')}</div>
+    </div>
+  `;
+}
+
+/* ---- CATEGORIA ---- */
+function renderCategoria(slug){
+  const c = cat(slug);
+  setTopbar({title:c.label, sub:'Visit Potrero', back:true});
+  setBottomnav('');
+  const items = BUSINESSES.filter(b=>b.category===slug);
+  document.getElementById('view').innerHTML = `
+    <div class="section" style="margin-top:0;">
+      <div class="section-head"><h2>${c.emoji} ${c.label}</h2></div>
+      <div class="biz-list">
+        ${items.length ? items.map(bizCard).join('') : `<div class="empty-state">Todavía no hay comercios cargados en esta categoría.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+/* ---- BUSCAR ---- */
+let searchState = {q:'', cat:'all'};
+function renderBuscar(){
+  setTopbar({title:'Buscar', sub:'Visit Potrero', back:true});
+  setBottomnav('');
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <div class="searchbar">
+      <span>🔎</span>
+      <input id="searchInput" placeholder="Buscar comercios, lugares..." value="${searchState.q}">
+    </div>
+    <div class="filter-row" id="filterRow"></div>
+    <div class="biz-list" id="results"></div>
+  `;
+  document.getElementById('filterRow').innerHTML = ['all',...CATEGORIES.map(c=>c.slug)].map(slug=>{
+    const label = slug==='all' ? 'Todas' : cat(slug).emoji+' '+cat(slug).label;
+    return `<button class="filter-pill ${searchState.cat===slug?'active':''}" onclick="setSearchCat('${slug}')">${label}</button>`;
+  }).join('');
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    searchState.q = e.target.value;
+    renderResults();
+  });
+  renderResults();
+}
+function setSearchCat(slug){ searchState.cat = slug; renderBuscar(); }
+function renderResults(){
+  const q = searchState.q.trim().toLowerCase();
+  let items = BUSINESSES.filter(b=>{
+    const matchCat = searchState.cat==='all' || b.category===searchState.cat;
+    const matchQ = !q || b.name.toLowerCase().includes(q) || b.address.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  document.getElementById('results').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">No encontramos resultados. Probá con otra búsqueda.</div>`;
+}
+
+/* ---- COMERCIO DETAIL ---- */
+function renderComercio(id){
+  const b = getBusiness(id);
+  if(!b){ setTopbar({title:'No encontrado', back:true}); setBottomnav(''); document.getElementById('view').innerHTML = `<div class="empty-state">Comercio no encontrado.</div>`; return; }
+  const c = cat(b.category);
+  setTopbar({title:b.name, sub:c.label, back:true});
+  setBottomnav('');
+  document.getElementById('view').innerHTML = `
+    <div class="detail-hero" style="background:${c.color}">${c.emoji}</div>
+    <div class="detail-title">${b.name}</div>
+    <div class="detail-cat">${c.emoji} ${c.label}</div>
+    <div class="detail-badges">${badgesFor(b)}</div>
+
+    <div class="detail-block">
+      <h3>Descripción</h3>
+      <p>${b.desc}</p>
+    </div>
+
+    <div class="detail-block">
+      <h3>Información</h3>
+      <div class="detail-row"><span class="ic">📍</span>${b.address}</div>
+      <div class="detail-row"><span class="ic">🕒</span>${b.hours}</div>
+      <div class="detail-row"><span class="ic">📞</span>${b.phone}</div>
+    </div>
+
+    <div class="cta-btns">
+      <a class="wsp" href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a class="map" href="https://www.google.com/maps?q=${b.lat},${b.lng}" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+    </div>
+  `;
+}
+
+/* ---- LUGAR DETAIL ---- */
+function renderLugar(id){
+  const p = getPlace(id);
+  if(!p){ setTopbar({title:'No encontrado', back:true}); setBottomnav(''); document.getElementById('view').innerHTML = `<div class="empty-state">Lugar no encontrado.</div>`; return; }
+  setTopbar({title:p.name, sub:p.type, back:true});
+  setBottomnav('');
+  document.getElementById('view').innerHTML = `
+    <div class="detail-hero" style="background:#16a34a">${p.emoji}</div>
+    <div class="detail-title">${p.name}</div>
+    <div class="detail-cat">${p.type}</div>
+    <div class="detail-block">
+      <h3>Descripción</h3>
+      <p>${p.desc}</p>
+    </div>
+    <div class="cta-btns">
+      <a class="map" style="flex:1" href="https://www.google.com/maps?q=${p.lat},${p.lng}" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+    </div>
+  `;
+}
+
+/* ---- EVENTOS / NOVEDADES ---- */
+function renderEventos(){
+  setTopbar({title:'Eventos', sub:'Visit Potrero', back:true});
+  setBottomnav('eventos');
+  document.getElementById('view').innerHTML = `
+    <div class="section" style="margin-top:0;">
+      ${EVENTS.map(e=>`<div class="event-card"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
+    </div>
+  `;
+}
+function renderNovedades(){
+  setTopbar({title:'Novedades', sub:'Visit Potrero', back:true});
+  setBottomnav('novedades');
+  document.getElementById('view').innerHTML = `
+    <div class="section" style="margin-top:0;">
+      ${NOVEDADES.map(e=>`<div class="event-card"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
+    </div>
+  `;
+}
+
+/* ---- MAPA ---- */
+let mapInstance = null;
+function renderMapa(){
+  setTopbar({title:'Mapa interactivo', sub:'Visit Potrero', back:true});
+  setBottomnav('mapa');
+  document.getElementById('view').innerHTML = `<div id="mapview"></div>`;
+  setTimeout(initMap, 0);
+}
+function initMap(){
+  const el = document.getElementById('mapview');
+  if(!el || typeof L === 'undefined') return;
+  if(mapInstance){ mapInstance.remove(); mapInstance = null; }
+  mapInstance = L.map('mapview').setView(CENTER, 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapInstance);
+
+  BUSINESSES.forEach(b=>{
+    const c = cat(b.category);
+    const icon = L.divIcon({
+      className:'',
+      html:`<div style="background:${c.color};width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;">
+              <span style="transform:rotate(45deg);font-size:14px;">${c.emoji}</span>
+            </div>`,
+      iconSize:[30,30], iconAnchor:[15,30]
+    });
+    L.marker([b.lat, b.lng], {icon}).addTo(mapInstance)
+      .bindPopup(`<b>${b.name}</b><br>${c.label}<br><span class="popup-link" onclick="navigate('/comercio/${b.id}')">Ver ficha →</span>`);
+  });
+
+  PLACES.forEach(p=>{
+    const icon = L.divIcon({
+      className:'',
+      html:`<div style="background:#16a34a;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;">
+              <span style="transform:rotate(45deg);font-size:14px;">${p.emoji}</span>
+            </div>`,
+      iconSize:[30,30], iconAnchor:[15,30]
+    });
+    L.marker([p.lat, p.lng], {icon}).addTo(mapInstance)
+      .bindPopup(`<b>${p.name}</b><br>${p.type}<br><span class="popup-link" onclick="navigate('/lugares/${p.id}')">Ver más →</span>`);
+  });
+}
+</script>
+</body>
+</html>
