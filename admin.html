@@ -227,6 +227,13 @@ function renderDraftStatus(){
 }
 
 /* ============ UTILIDADES ============ */
+// Devuelve las subcategorías de un comercio como array, sin importar si
+// vienen en el campo nuevo (subcategories: []) o en el viejo (subcategory: '').
+function subcatsOf(b){
+  if(Array.isArray(b.subcategories)) return b.subcategories.filter(Boolean);
+  if(b.subcategory) return [b.subcategory];
+  return [];
+}
 function slugify(str){
   return (str || '')
     .toString().toLowerCase()
@@ -311,7 +318,7 @@ function renderComerciosItems(){
           ${b.featured?'<span class="pill-tag featured">☆ Destacado</span>':''}
           <span class="pill-tag ${b.open?'':'closed'}">${b.open?'Abierto':'Cerrado'}</span>
         </div>
-        <div class="row-meta">${c.emoji} ${c.label}${b.subcategory ? ' · '+esc(b.subcategory) : ''} · ${esc(b.address)}</div>
+        <div class="row-meta">${c.emoji} ${c.label}${subcatsOf(b).length ? ' · '+esc(subcatsOf(b).join(', ')) : ''} · ${esc(b.address)}</div>
       </div>
       <div class="row-actions">
         <button class="btn btn-outline btn-sm" onclick="openComercioForm('${b.id}')">Editar</button>
@@ -330,7 +337,7 @@ function openComercioForm(id){
   const editing = !!id;
   const b = editing ? BUSINESSES.find(x=>x.id===id) : {
     name:'', category:CATEGORIES[0].slug, address:'', desc:'', phone:'', hours:'',
-    email:'', web:'', instagram:'',
+    email:'', web:'', instagram:'', facebook:'',
     open:true, top:false, featured:false, photo:'', lat:'', lng:''
   };
   formPhotoValue = b.photo || '';
@@ -349,7 +356,7 @@ function openComercioForm(id){
         <div class="field-row">
           <div class="field">
             <label>Categoría *</label>
-            <select id="f_category" onchange="renderSubcategoryOptions(this.value, '')">
+            <select id="f_category" onchange="renderSubcategoryOptions(this.value, [])">
               ${CATEGORIES.map(c=>`<option value="${c.slug}" ${b.category===c.slug?'selected':''}>${c.emoji} ${c.label}</option>`).join('')}
             </select>
           </div>
@@ -383,9 +390,15 @@ function openComercioForm(id){
             <input type="text" id="f_web" value="${esc(b.web||'')}" placeholder="https://...">
           </div>
         </div>
-        <div class="field">
-          <label>Instagram <span class="hint">(opcional)</span></label>
-          <input type="text" id="f_instagram" value="${esc(b.instagram||'')}" placeholder="@usuario  ó  https://instagram.com/usuario">
+        <div class="field-row">
+          <div class="field">
+            <label>Instagram <span class="hint">(opcional)</span></label>
+            <input type="text" id="f_instagram" value="${esc(b.instagram||'')}" placeholder="@usuario  ó  https://instagram.com/usuario">
+          </div>
+          <div class="field">
+            <label>Facebook <span class="hint">(opcional)</span></label>
+            <input type="text" id="f_facebook" value="${esc(b.facebook||'')}" placeholder="nombre-de-página  ó  https://facebook.com/...">
+          </div>
         </div>
         <div class="field">
           <label>Foto del comercio <span class="hint">(si no cargás una, se muestra una de ejemplo)</span></label>
@@ -423,25 +436,26 @@ function openComercioForm(id){
   `;
   document.getElementById('modalRoot').innerHTML = html;
   updatePhotoPreview();
-  renderSubcategoryOptions(b.category, b.subcategory || '');
+  renderSubcategoryOptions(b.category, subcatsOf(b));
 }
 
-function renderSubcategoryOptions(categorySlug, currentValue){
+function renderSubcategoryOptions(categorySlug, currentValues){
   const wrap = document.getElementById('f_subcategory_wrap');
   if(!wrap) return;
   const list = (typeof SUBCATEGORIES !== 'undefined' && SUBCATEGORIES[categorySlug]) || [];
   if(list.length){
+    // Lista predefinida: se pueden tildar varias.
     wrap.innerHTML = `
-      <label>Subcategoría</label>
-      <select id="f_subcategory">
-        <option value="">Sin subcategoría</option>
-        ${list.map(sc=>`<option value="${esc(sc)}" ${currentValue===sc?'selected':''}>${esc(sc)}</option>`).join('')}
-      </select>
+      <label>Subcategorías <span class="hint">(podés elegir más de una)</span></label>
+      <div class="checks" id="f_subcategory_checks">
+        ${list.map(sc=>`<label class="check-item"><input type="checkbox" value="${esc(sc)}" ${currentValues.includes(sc)?'checked':''}> ${esc(sc)}</label>`).join('')}
+      </div>
     `;
   } else {
+    // Sin lista predefinida: texto libre separado por comas, para poder poner varias.
     wrap.innerHTML = `
-      <label>Subcategoría <span class="hint">(opcional)</span></label>
-      <input type="text" id="f_subcategory" value="${esc(currentValue)}" placeholder="Ej: Boutique, Almacén...">
+      <label>Subcategorías <span class="hint">(opcional, separadas por coma)</span></label>
+      <input type="text" id="f_subcategory_text" value="${esc(currentValues.join(', '))}" placeholder="Ej: Boutique, Almacén...">
     `;
   }
 }
@@ -547,11 +561,18 @@ function saveComercio(id){
   if(!name || !address){ alert('Completá al menos el nombre y la dirección.'); return; }
   const latVal = document.getElementById('f_lat').value;
   const lngVal = document.getElementById('f_lng').value;
-  const subcatEl = document.getElementById('f_subcategory');
+  const subcatChecks = document.querySelectorAll('#f_subcategory_checks input[type=checkbox]:checked');
+  const subcatText = document.getElementById('f_subcategory_text');
+  let subcategories = [];
+  if(subcatChecks.length){
+    subcategories = [...subcatChecks].map(c=>c.value);
+  } else if(subcatText){
+    subcategories = subcatText.value.split(',').map(s=>s.trim()).filter(Boolean);
+  }
   const data = {
     name,
     category: document.getElementById('f_category').value,
-    subcategory: subcatEl ? subcatEl.value.trim() : '',
+    subcategories,
     address,
     desc: document.getElementById('f_desc').value.trim(),
     phone: document.getElementById('f_phone').value.trim(),
@@ -559,6 +580,7 @@ function saveComercio(id){
     email: document.getElementById('f_email').value.trim(),
     web: document.getElementById('f_web').value.trim(),
     instagram: document.getElementById('f_instagram').value.trim(),
+    facebook: document.getElementById('f_facebook').value.trim(),
     photo: formPhotoValue.trim(),
     open: document.getElementById('f_open').checked,
     top: document.getElementById('f_top').checked,
@@ -860,6 +882,8 @@ function buildDataJsText(){
 ========================================================================== */
 
 const CATEGORIES = ${j(CATEGORIES)};
+
+const SUBCATEGORIES = ${j(typeof SUBCATEGORIES !== 'undefined' ? SUBCATEGORIES : {})};
 
 const CENTER = ${j(CENTER)}; // Potrero de los Funes, San Luis
 
