@@ -132,6 +132,22 @@
   .place-card .name{font-size:13.5px;font-weight:700;margin:3px 0 4px;}
   .place-card .desc{font-size:11.5px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 
+  /* Promo cards (estilo "descuentos imperdibles") */
+  .promo-card{
+    flex:0 0 auto;width:210px;height:150px;border-radius:18px;overflow:hidden;position:relative;
+    scroll-snap-align:start;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .promo-card .promo-img{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;
+  }
+  .promo-card .promo-caption{
+    position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;color:#fff;
+    background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0));
+  }
+  .promo-card .promo-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+  .promo-card .promo-highlight{font-size:17px;font-weight:800;color:var(--primary);line-height:1.15;}
+  .promo-card .promo-sub{font-size:10.5px;opacity:.85;margin-top:2px;}
+
   /* Business list */
   .biz-list{display:flex;flex-direction:column;gap:10px;}
   .biz-card{
@@ -390,6 +406,19 @@ function bizCard(b){
   </div>`;
 }
 
+function promoCard(b){
+  const c = cat(b.category);
+  const highlight = b.top ? '★ Top de Potrero' : (b.featured ? '☆ Recomendado' : c.label);
+  return `<div class="promo-card" onclick="navigate('/comercio/${b.id}')">
+    <div class="promo-img" style="background:${c.color}">${c.emoji}</div>
+    <div class="promo-caption">
+      <div class="promo-name">${b.name}</div>
+      <div class="promo-highlight">${highlight}</div>
+      <div class="promo-sub">${c.label} · ${b.open ? 'Abierto ahora' : b.hours}</div>
+    </div>
+  </div>`;
+}
+
 function placeCard(p){
   return `<div class="place-card" onclick="navigate('/lugares/${p.id}')">
     <div class="img">${p.emoji}</div>
@@ -458,8 +487,7 @@ function render(){
 function renderHome(){
   hideTopbar();
   setBottomnav('home');
-  const featured = BUSINESSES.filter(b=>b.featured);
-  const top = BUSINESSES.filter(b=>b.top);
+  const highlights = BUSINESSES.filter(b=>b.top || b.featured);
   const view = document.getElementById('view');
   view.innerHTML = `
     <div class="home-panel">
@@ -478,14 +506,8 @@ function renderHome(){
     </div>
 
     <div class="section" style="margin-top:0;">
-      <div class="map-cta" onclick="navigate('/mapa')">
-        <div class="emoji">🗺️</div>
-        <div>
-          <div class="t1">MAPA INTERACTIVO</div>
-          <div class="t2">Explorá Potrero</div>
-          <div class="t3">Encontrá comercios, gastronomía, alojamientos y lugares cerca tuyo.</div>
-        </div>
-      </div>
+      <div class="section-head"><h2>Destacados imperdibles</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
+      <div class="hscroll">${highlights.map(promoCard).join('')}</div>
     </div>
 
     <div class="section">
@@ -493,12 +515,6 @@ function renderHome(){
       <div class="section-desc">Los rincones más lindos de Potrero</div>
       <div class="hscroll">${PLACES.map(placeCard).join('')}</div>
     </div>
-
-    ${featured.length ? `
-    <div class="section">
-      <div class="section-head"><h2>Destacados</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
-      <div class="biz-list">${featured.map(bizCard).join('')}</div>
-    </div>` : ''}
 
     <div class="section">
       <div class="section-head"><h2>Todos los comercios</h2><span class="see-all" onclick="navigate('/buscar')">Ver todos</span></div>
