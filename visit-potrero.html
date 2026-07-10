@@ -211,6 +211,9 @@
     display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;
   }
   .biz-card .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  /* Placeholder de logo (alojamientos sin foto propia todavía): se ve completo,
+     sin recortarse como pasaría con "cover" en una imagen apaisada. */
+  .thumb-logo img.logo-fit{object-fit:contain;padding:16px;}
   .biz-card .info{flex:1;min-width:0;padding:14px 14px 14px 16px;display:flex;flex-direction:column;justify-content:center;}
   .biz-card .badges{display:flex;gap:6px;align-items:center;margin-bottom:2px;flex-wrap:wrap;}
   .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;}
@@ -359,16 +362,32 @@ function getPlace(id){ return PLACES.find(p=>p.id===id); }
 // sin importar en qué lista/orden aparezca — así la card y la ficha coinciden.
 function photoForBusiness(b){
   if(b.photo) return b.photo;
+  // Alojamiento todavía no tiene fotos reales cargadas: mostramos el logo
+  // como placeholder hasta que se suba una foto propia por admin.html.
+  if(b.category === 'alojamiento') return 'images/logo.png';
   let hash = 0;
   for(let i=0;i<b.id.length;i++){ hash = (hash*31 + b.id.charCodeAt(i)) >>> 0; }
   return SAMPLE_PHOTOS[hash % SAMPLE_PHOTOS.length];
 }
 
+// Devuelve las subcategorías de un comercio como array, sin importar si
+// vienen en el campo nuevo (subcategories: []) o en el viejo (subcategory: '').
+function subcatsOf(b){
+  if(Array.isArray(b.subcategories)) return b.subcategories.filter(Boolean);
+  if(b.subcategory) return [b.subcategory];
+  return [];
+}
+
+// El placeholder (logo) no debe recortarse como una foto real: se ve
+// completo y con fondo blanco en vez de "cover" sobre el color de la categoría.
+function isLogoPlaceholder(photo){ return photo === 'images/logo.png'; }
+
 function bizThumb(b){
   const c = cat(b.category);
   const photo = photoForBusiness(b);
-  return `<div class="thumb" style="background:${c.color}">
-    ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
+  const isLogo = isLogoPlaceholder(photo);
+  return `<div class="thumb${isLogo ? ' thumb-logo' : ''}" style="background:${isLogo ? '#fff' : c.color}">
+    ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy"${isLogo ? ' class="logo-fit"' : ''}>` : c.emoji}
   </div>`;
 }
 
@@ -385,7 +404,7 @@ function bizCard(b, i){
     <div class="info">
       <div class="badges">${badgesFor(b)}</div>
       <div class="name">${b.name}</div>
-      <div class="cat">${cat(b.category).label}${b.subcategory ? ' · '+b.subcategory : ''}</div>
+      <div class="cat">${cat(b.category).label}${subcatsOf(b).length ? ' · '+subcatsOf(b).join(', ') : ''}</div>
       <div class="addr">📍 ${b.address}</div>
     </div>
     ${bizThumb(b, i)}
@@ -396,9 +415,10 @@ function promoCard(b, i){
   const c = cat(b.category);
   const highlight = b.top ? '★ Top de Potrero' : (b.featured ? '☆ Recomendado' : c.label);
   const photo = photoForBusiness(b);
+  const isLogo = isLogoPlaceholder(photo);
   return `<div class="promo-card reveal" style="transition-delay:${(i%4)*70}ms" onclick="navigate('/comercio/${b.id}')">
-    <div class="promo-img" style="background:${c.color}">
-      ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
+    <div class="promo-img${isLogo ? ' thumb-logo' : ''}" style="background:${isLogo ? '#fff' : c.color}">
+      ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy"${isLogo ? ' class="logo-fit"' : ''}>` : c.emoji}
     </div>
     <div class="promo-caption">
       <div class="promo-name">${b.name}</div>
@@ -496,8 +516,23 @@ function initScrollReveal(){
 }
 
 /* ============ ROUTER ============ */
-function navigate(path){ location.hash = '#' + path; }
-window.addEventListener('hashchange', render);
+// navigate() renderiza en el momento (sincrónico, dentro del mismo click/tap)
+// en vez de esperar al evento 'hashchange' (que llega en una tarea aparte).
+// Esto es clave para que input.focus() abra el teclado en celular: iOS/Android
+// solo abren el teclado automáticamente si el focus ocurre "dentro" del gesto
+// del usuario, y un focus disparado por un evento async ya llega tarde.
+let lastHandledHash = null;
+function navigate(path){
+  const newHash = '#' + path;
+  if(location.hash === newHash){ render(); return; }
+  lastHandledHash = newHash;
+  location.hash = newHash;
+  render();
+}
+window.addEventListener('hashchange', () => {
+  if(location.hash === lastHandledHash){ lastHandledHash = null; return; }
+  render();
+});
 window.addEventListener('DOMContentLoaded', render);
 
 function parseRoute(){
@@ -665,35 +700,57 @@ function renderHome(){
 
 /* ---- CATEGORIA ---- */
 let categoriaFilterSub = 'all';
+let categoriaFilterQ = '';
 function renderCategoria(slug){
   const c = cat(slug);
   categoriaFilterSub = 'all';
+  categoriaFilterQ = '';
   setTopbar({title:c.label, sub:'Visit Potrero', back:true});
   setBottomnav('');
   const subcats = (typeof SUBCATEGORIES !== 'undefined' && SUBCATEGORIES[slug]) || [];
   document.getElementById('view').innerHTML = `
     <div class="section" style="margin-top:0;">
-      <div class="section-head"><h2>${c.emoji} ${c.label}</h2></div>
+      <div class="searchbar" style="margin-bottom:14px;">
+        <span>🔎</span>
+        <input id="categoriaSearchInput" placeholder="Buscar en ${c.label.toLowerCase()}...">
+      </div>
       ${subcats.length ? `<div class="filter-row" id="subFilterRow"></div>` : ''}
       <div class="biz-list" id="categoriaItems"></div>
     </div>
   `;
+  const searchInput = document.getElementById('categoriaSearchInput');
+  searchInput.addEventListener('input', e=>{
+    categoriaFilterQ = e.target.value;
+    renderCategoriaItems(slug);
+  });
   if(subcats.length){
-    document.getElementById('subFilterRow').innerHTML = ['all', ...subcats].map(sc=>{
-      const label = sc==='all' ? 'Todas' : sc;
-      return `<button class="filter-pill ${categoriaFilterSub===sc?'active':''}" onclick="setCategoriaFilterSub('${slug}','${sc}')">${label}</button>`;
-    }).join('');
+    renderSubFilterRow(slug, subcats);
     lockHorizontalSwipe('subFilterRow');
   }
   renderCategoriaItems(slug);
 }
+function renderSubFilterRow(slug, subcats){
+  document.getElementById('subFilterRow').innerHTML = ['all', ...subcats].map(sc=>{
+    const label = sc==='all' ? 'Todas' : sc;
+    return `<button class="filter-pill ${categoriaFilterSub===sc?'active':''}" onclick="setCategoriaFilterSub('${slug}','${sc}')">${label}</button>`;
+  }).join('');
+}
 function setCategoriaFilterSub(slug, sc){
-  categoriaFilterSub = sc;
-  renderCategoria(slug);
+  // Si tocás el filtro que ya está activo, se desactiva y vuelve a "Todas".
+  categoriaFilterSub = (categoriaFilterSub === sc) ? 'all' : sc;
+  const subcats = (typeof SUBCATEGORIES !== 'undefined' && SUBCATEGORIES[slug]) || [];
+  renderSubFilterRow(slug, subcats);
+  renderCategoriaItems(slug);
 }
 function renderCategoriaItems(slug){
-  const items = BUSINESSES.filter(b=>b.category===slug && (categoriaFilterSub==='all' || b.subcategory===categoriaFilterSub));
-  document.getElementById('categoriaItems').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">Todavía no hay comercios cargados acá.</div>`;
+  const q = categoriaFilterQ.trim();
+  const items = BUSINESSES.filter(b=>{
+    if(b.category !== slug) return false;
+    if(categoriaFilterSub !== 'all' && !subcatsOf(b).includes(categoriaFilterSub)) return false;
+    if(!q) return true;
+    return fuzzyMatch(q, b.name) || fuzzyMatch(q, b.address) || subcatsOf(b).some(sc=>fuzzyMatch(q, sc));
+  });
+  document.getElementById('categoriaItems').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">No encontramos comercios con ese filtro.</div>`;
   initScrollReveal();
 }
 
@@ -719,8 +776,9 @@ function renderBuscar(){
     renderResults();
   });
   renderResults();
-  // Foco automático para que el teclado se abra sin necesidad de un segundo toque.
-  requestAnimationFrame(() => input.focus());
+  // Foco automático (sincrónico, dentro del mismo gesto) para que el teclado
+  // se abra solo, sin necesidad de un segundo toque.
+  input.focus();
 }
 function renderFilterRow(){
   document.getElementById('filterRow').innerHTML = ['all',...CATEGORIES.map(c=>c.slug)].map(slug=>{
@@ -770,7 +828,7 @@ function renderResults(){
   const q = searchState.q.trim();
   let items = BUSINESSES.filter(b=>{
     const matchCat = searchState.cat==='all' || b.category===searchState.cat;
-    const matchQ = !q || fuzzyMatch(q, b.name) || fuzzyMatch(q, b.address) || fuzzyMatch(q, cat(b.category).label) || (b.subcategory && fuzzyMatch(q, b.subcategory));
+    const matchQ = !q || fuzzyMatch(q, b.name) || fuzzyMatch(q, b.address) || fuzzyMatch(q, cat(b.category).label) || subcatsOf(b).some(sc=>fuzzyMatch(q, sc));
     return matchCat && matchQ;
   });
   document.getElementById('results').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">No encontramos resultados. Probá con otra búsqueda.</div>`;
@@ -785,33 +843,36 @@ function renderComercio(id){
   setTopbar({title:b.name, sub:c.label, back:true});
   setBottomnav('');
   const photo = photoForBusiness(b);
+  const isLogo = isLogoPlaceholder(photo);
   const igUrl = instagramUrl(b.instagram);
   const webUrl = websiteUrl(b.web);
+  const fbUrl = facebookUrl(b.facebook);
   document.getElementById('view').innerHTML = `
-    <div class="detail-hero" style="background:${c.color}">
-      ${photo ? `<img src="${photo}" alt="${b.name}">` : c.emoji}
+    <div class="detail-hero${isLogo ? ' thumb-logo' : ''}" style="background:${isLogo ? '#fff' : c.color}">
+      ${photo ? `<img src="${photo}" alt="${b.name}"${isLogo ? ' class="logo-fit"' : ''}>` : c.emoji}
     </div>
     <div class="detail-title">${b.name}</div>
-    <div class="detail-cat">${c.emoji} ${c.label}${b.subcategory ? ' · '+b.subcategory : ''}</div>
+    <div class="detail-cat">${c.emoji} ${c.label}${subcatsOf(b).length ? ' · '+subcatsOf(b).join(', ') : ''}</div>
     <div class="detail-badges">${badgesFor(b)}</div>
 
-    <div class="detail-block">
+    ${b.desc ? `<div class="detail-block">
       <h3>Descripción</h3>
       <p>${b.desc}</p>
-    </div>
+    </div>` : ''}
 
     <div class="detail-block">
       <h3>Información</h3>
-      <div class="detail-row"><span class="ic">📍</span>${b.address}</div>
-      <div class="detail-row"><span class="ic">🕒</span>${b.hours}</div>
-      <div class="detail-row"><span class="ic">📞</span>${b.phone}</div>
+      ${b.address ? `<div class="detail-row"><span class="ic">📍</span>${b.address}</div>` : ''}
+      ${b.hours ? `<div class="detail-row"><span class="ic">🕒</span>${b.hours}</div>` : ''}
+      ${b.phone ? `<div class="detail-row"><span class="ic">📞</span>${b.phone}</div>` : ''}
       ${b.email ? `<div class="detail-row"><span class="ic">✉️</span><a href="mailto:${b.email}">${b.email}</a></div>` : ''}
       ${webUrl ? `<div class="detail-row"><span class="ic">🌐</span><a href="${webUrl}" target="_blank" rel="noopener">${b.web}</a></div>` : ''}
       ${igUrl ? `<div class="detail-row"><span class="ic">📷</span><a href="${igUrl}" target="_blank" rel="noopener">${b.instagram}</a></div>` : ''}
+      ${fbUrl ? `<div class="detail-row"><span class="ic">📘</span><a href="${fbUrl}" target="_blank" rel="noopener">Facebook</a></div>` : ''}
     </div>
 
     <div class="cta-btns">
-      <a class="wsp" href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener">💬 WhatsApp</a>
+      ${b.phone ? `<a class="wsp" href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ''}
       <a class="map" href="https://www.google.com/maps?q=${b.lat},${b.lng}" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
     </div>
   `;
@@ -828,6 +889,12 @@ function websiteUrl(v){
   v = v.trim();
   if(/^https?:\/\//i.test(v)) return v;
   return 'https://' + v;
+}
+function facebookUrl(v){
+  if(!v) return '';
+  v = v.trim();
+  if(/^https?:\/\//i.test(v)) return v;
+  return 'https://facebook.com/' + v.replace(/^\//,'');
 }
 
 /* ---- LUGAR DETAIL ---- */
