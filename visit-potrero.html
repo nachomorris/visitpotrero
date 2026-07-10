@@ -124,20 +124,26 @@
   .cat-chip .label{display:block;font-size:10.5px;font-weight:600;color:var(--ink);white-space:nowrap;}
   .cat-chip.active .emoji{outline:2px solid var(--ink);}
 
-  /* Flechitas de scroll de categorías (como en el menú de Pehuen) */
+  /* Flechitas de scroll de categorías (sutiles, como en el menú de Pehuen) */
   .cat-grid-wrap{position:relative;}
+  .edge-fade{
+    position:absolute;top:0;bottom:0;width:28px;pointer-events:none;
+    transition:opacity .2s ease;z-index:1;
+  }
+  .edge-fade.left{left:0;background:linear-gradient(to right, var(--primary) 40%, rgba(163,230,53,0));}
+  .edge-fade.right{right:0;background:linear-gradient(to left, var(--primary) 40%, rgba(163,230,53,0));}
+  .edge-fade.is-hidden{opacity:0;}
   .scroll-chevron{
     position:absolute;top:26px;transform:translateY(-50%);
-    width:26px;height:26px;border-radius:50%;
-    background:rgba(255,255,255,.92);color:var(--ink);
+    width:18px;height:30px;
     display:flex;align-items:center;justify-content:center;
-    font-size:13px;font-weight:800;border:none;cursor:pointer;padding:0;
-    box-shadow:0 2px 8px rgba(0,0,0,.2);
+    font-size:20px;font-weight:800;color:rgba(51,51,51,.75);
+    background:none;border:none;box-shadow:none;cursor:pointer;padding:0;
     transition:opacity .2s ease, visibility .2s ease;
     z-index:2;line-height:1;
   }
-  .scroll-chevron.left{left:-6px;}
-  .scroll-chevron.right{right:-6px;}
+  .scroll-chevron.left{left:-2px;}
+  .scroll-chevron.right{right:-2px;}
   .scroll-chevron.is-hidden{opacity:0;visibility:hidden;pointer-events:none;}
 
   /* Map CTA */
@@ -510,10 +516,16 @@ function updateCatChevrons(){
   const grid = document.getElementById('catGrid');
   const left = document.getElementById('catChevronLeft');
   const right = document.getElementById('catChevronRight');
+  const fadeLeft = document.getElementById('catFadeLeft');
+  const fadeRight = document.getElementById('catFadeRight');
   if(!grid || !left || !right) return;
   const maxScroll = grid.scrollWidth - grid.clientWidth;
-  left.classList.toggle('is-hidden', grid.scrollLeft <= 4);
-  right.classList.toggle('is-hidden', maxScroll <= 4 || grid.scrollLeft >= maxScroll - 4);
+  const atStart = grid.scrollLeft <= 4;
+  const atEnd = maxScroll <= 4 || grid.scrollLeft >= maxScroll - 4;
+  left.classList.toggle('is-hidden', atStart);
+  right.classList.toggle('is-hidden', atEnd);
+  if(fadeLeft) fadeLeft.classList.toggle('is-hidden', atStart);
+  if(fadeRight) fadeRight.classList.toggle('is-hidden', atEnd);
 }
 function scrollCatGrid(dir){
   const grid = document.getElementById('catGrid');
@@ -672,12 +684,14 @@ function renderHome(){
         <span>🔎</span><span style="color:var(--muted);font-size:14px;">Buscá tu comercio</span>
       </div>
       <div class="cat-grid-wrap">
+        <div class="edge-fade left is-hidden" id="catFadeLeft"></div>
         <button class="scroll-chevron left is-hidden" id="catChevronLeft" onclick="scrollCatGrid(-1)" aria-label="Categorías anteriores">‹</button>
         <div class="cat-grid" id="catGrid">
           ${CATEGORIES.map(c=>`<div class="cat-chip" onclick="navigate('/categoria/${c.slug}')">
             <div class="emoji">${c.emoji}</div><span class="label">${c.label}</span>
           </div>`).join('')}
         </div>
+        <div class="edge-fade right" id="catFadeRight"></div>
         <button class="scroll-chevron right" id="catChevronRight" onclick="scrollCatGrid(1)" aria-label="Más categorías">›</button>
       </div>
     </div>
