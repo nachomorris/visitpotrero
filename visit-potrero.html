@@ -67,7 +67,7 @@
     margin:-16px -16px 24px;padding:14px 16px 18px;
     position:sticky;top:0;z-index:20;
     box-shadow:0 4px 16px rgba(0,0,0,.1);
-    transition:background-color .25s ease, -webkit-backdrop-filter .25s ease, backdrop-filter .25s ease;
+    transition:background-color .25s ease, -webkit-backdrop-filter .25s ease, backdrop-filter .25s ease, padding .28s ease;
   }
   .home-panel.scrolled{
     background:rgba(163,230,53,.7);
@@ -102,10 +102,15 @@
 
   /* Categories row (single row, swipeable) */
   .cat-grid{
-    display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
-    padding:2px 2px 4px;
+    display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+    padding:2px 2px 4px;max-height:100px;opacity:1;
+    transition:max-height .28s ease, opacity .2s ease, padding .28s ease, margin .28s ease;
     -ms-overflow-style:none;scrollbar-width:none;
   }
+  .home-panel.collapsed .cat-grid{
+    max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin:0;pointer-events:none;overflow:hidden;
+  }
+  .home-panel.collapsed{padding-bottom:14px;}
   .cat-grid::-webkit-scrollbar{display:none;}
   .cat-chip{
     flex:0 0 auto;text-align:center;cursor:pointer;background:transparent;border:none;padding:0;
@@ -524,14 +529,26 @@ function render(){
 
 /* ---- HOME ---- */
 let homeScrollHandler = null;
+let homeLastScrollY = 0;
 function setupHomePanelFade(){
   const panel = document.querySelector('.home-panel');
   if(!panel) return;
   if(homeScrollHandler) window.removeEventListener('scroll', homeScrollHandler);
+  homeLastScrollY = window.scrollY;
   homeScrollHandler = () => {
     const p = document.querySelector('.home-panel');
     if(!p){ window.removeEventListener('scroll', homeScrollHandler); homeScrollHandler = null; return; }
-    if(window.scrollY > 8) p.classList.add('scrolled'); else p.classList.remove('scrolled');
+    const y = window.scrollY;
+    const delta = y - homeLastScrollY;
+    if(y > 8) p.classList.add('scrolled'); else p.classList.remove('scrolled');
+    if(y <= 8){
+      p.classList.remove('collapsed'); // arriba del todo: se ve completo
+    } else if(delta > 2){
+      p.classList.add('collapsed'); // bajando: se esconden los íconos
+    } else if(delta < -2){
+      p.classList.remove('collapsed'); // subiendo: reaparecen
+    }
+    homeLastScrollY = y;
   };
   window.addEventListener('scroll', homeScrollHandler, {passive:true});
   homeScrollHandler();
