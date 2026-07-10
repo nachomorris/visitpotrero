@@ -227,6 +227,17 @@
 
   .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px;}
 
+  /* Scroll reveal */
+  .reveal{
+    opacity:0;transform:translateY(26px);
+    transition:opacity .6s cubic-bezier(.22,.68,.35,1), transform .6s cubic-bezier(.22,.68,.35,1);
+    will-change:opacity,transform;
+  }
+  .reveal.revealed{opacity:1;transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+  }
+
   /* Bottom nav */
   nav.bottomnav{
     position:fixed;bottom:0;left:0;right:0;z-index:30;
@@ -431,7 +442,7 @@ function badgesFor(b){
 }
 
 function bizCard(b, i){
-  return `<div class="biz-card" onclick="navigate('/comercio/${b.id}')">
+  return `<div class="biz-card reveal" style="transition-delay:${((i||0)%6)*60}ms" onclick="navigate('/comercio/${b.id}')">
     <div class="info">
       <div class="badges">${badgesFor(b)}</div>
       <div class="name">${b.name}</div>
@@ -453,7 +464,7 @@ function promoCard(b, i){
   const c = cat(b.category);
   const highlight = b.top ? '★ Top de Potrero' : (b.featured ? '☆ Recomendado' : c.label);
   const photo = b.photo || SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
-  return `<div class="promo-card" onclick="navigate('/comercio/${b.id}')">
+  return `<div class="promo-card reveal" style="transition-delay:${(i%4)*70}ms" onclick="navigate('/comercio/${b.id}')">
     <div class="promo-img" style="background:${c.color}">
       ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
     </div>
@@ -467,8 +478,8 @@ function promoCard(b, i){
 /* Nota: estructura de tarjeta calcada de .discount-card de PLIN
    (business chico arriba, título grande, subtítulo chico, foto 150px arriba). */
 
-function placeCard(p){
-  return `<div class="place-card" onclick="navigate('/lugares/${p.id}')">
+function placeCard(p, i){
+  return `<div class="place-card reveal" style="transition-delay:${((i||0)%4)*70}ms" onclick="navigate('/lugares/${p.id}')">
     <div class="img">${p.emoji}</div>
     <div class="body">
       <div class="tag">${p.type}</div>
@@ -476,6 +487,28 @@ function placeCard(p){
       <div class="desc">${p.desc}</div>
     </div>
   </div>`;
+}
+
+/* ============ SCROLL REVEAL ============ */
+let revealObserver = null;
+function initScrollReveal(){
+  const els = document.querySelectorAll('.reveal:not(.revealed)');
+  if(!els.length) return;
+  if(!('IntersectionObserver' in window)){
+    els.forEach(el=>el.classList.add('revealed'));
+    return;
+  }
+  if(!revealObserver){
+    revealObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('revealed');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.12, rootMargin:'0px 0px -30px 0px'});
+  }
+  els.forEach(el=>revealObserver.observe(el));
 }
 
 /* ============ ROUTER ============ */
@@ -625,6 +658,7 @@ function renderHome(){
     </div>
   `;
   setupHomePanelFade();
+  initScrollReveal();
 }
 
 /* ---- CATEGORIA ---- */
@@ -641,6 +675,7 @@ function renderCategoria(slug){
       </div>
     </div>
   `;
+  initScrollReveal();
 }
 
 /* ---- BUSCAR ---- */
@@ -676,6 +711,7 @@ function renderResults(){
     return matchCat && matchQ;
   });
   document.getElementById('results').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">No encontramos resultados. Probá con otra búsqueda.</div>`;
+  initScrollReveal();
 }
 
 /* ---- COMERCIO DETAIL ---- */
@@ -736,18 +772,20 @@ function renderEventos(){
   setBottomnav('eventos');
   document.getElementById('view').innerHTML = `
     <div class="section" style="margin-top:0;">
-      ${EVENTS.map(e=>`<div class="event-card"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
+      ${EVENTS.map((e,i)=>`<div class="event-card reveal" style="transition-delay:${(i%6)*60}ms"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
     </div>
   `;
+  initScrollReveal();
 }
 function renderNovedades(){
   setTopbar({title:'Novedades', sub:'Visit Potrero', back:true});
   setBottomnav('novedades');
   document.getElementById('view').innerHTML = `
     <div class="section" style="margin-top:0;">
-      ${NOVEDADES.map(e=>`<div class="event-card"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
+      ${NOVEDADES.map((e,i)=>`<div class="event-card reveal" style="transition-delay:${(i%6)*60}ms"><div class="date">${e.date}</div><h3>${e.title}</h3><p>${e.desc}</p></div>`).join('')}
     </div>
   `;
+  initScrollReveal();
 }
 
 /* ---- MAPA ---- */
