@@ -56,18 +56,32 @@
     background:var(--primary);border:none;color:var(--ink);width:32px;height:32px;border-radius:50%;
     font-size:16px;font-weight:800;cursor:pointer;flex:none;
   }
+  header.topbar.hidden{display:none;}
 
   main{padding:16px 16px 8px;}
 
-  /* Home top panel (buscador + categorías) */
+  /* Home top panel (marca + buscador + categorías, todo integrado) */
   .home-panel{
     background:var(--primary);color:var(--ink);
     border-radius:0 0 28px 28px;
-    margin:0 -16px 24px;padding:18px 16px 22px;
+    margin:-16px -16px 24px;padding:14px 16px 18px;
+    position:sticky;top:0;z-index:20;
+    box-shadow:0 4px 16px rgba(0,0,0,.1);
   }
-  .home-panel .eyebrow{font-size:11px;font-weight:700;letter-spacing:.04em;opacity:.75;}
-  .home-panel h1{font-size:23px;margin:4px 0 2px;font-weight:800;}
-  .home-panel p{margin:0 0 14px;font-size:13px;opacity:.85;font-weight:500;}
+  .panel-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .panel-topbar .brand{
+    display:flex;align-items:center;gap:7px;background:var(--ink);color:#fff;
+    padding:6px 14px 6px 6px;border-radius:20px;font-weight:800;font-size:13px;
+  }
+  .panel-topbar .brand .logo-ic{
+    width:22px;height:22px;border-radius:50%;background:var(--primary);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;
+  }
+  .panel-topbar .menu-btn{
+    width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.12);
+    display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ink);
+    border:none;cursor:pointer;flex:none;
+  }
 
   .section{margin:52px 0 26px;}
   .section:first-of-type{margin-top:0;}
@@ -76,10 +90,16 @@
   .section-head .see-all{font-size:12.5px;color:var(--primary-dark);font-weight:600;}
   .section-desc{font-size:12.5px;color:var(--muted);margin:-8px 0 12px;}
 
-  /* Categories grid */
-  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  /* Categories row (single row, swipeable) */
+  .cat-grid{
+    display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
+    padding:2px 2px 4px;margin:0 -16px;padding-left:16px;padding-right:16px;
+    -ms-overflow-style:none;scrollbar-width:none;
+  }
+  .cat-grid::-webkit-scrollbar{display:none;}
   .cat-chip{
-    text-align:center;cursor:pointer;background:transparent;border:none;padding:0;
+    flex:0 0 auto;width:60px;text-align:center;cursor:pointer;background:transparent;border:none;padding:0;
+    scroll-snap-align:start;
   }
   .cat-chip .emoji{
     width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;
@@ -394,12 +414,18 @@ function parseRoute(){
 
 function setTopbar({title, sub, back}){
   const tb = document.getElementById('topbar');
+  tb.classList.remove('hidden');
   tb.innerHTML = `
     ${back ? `<button class="back" onclick="history.back()">←</button>` : `<div class="logo">🏔️</div>`}
     <div>
       <div class="title">${title}</div>
       ${sub ? `<div class="sub">${sub}</div>` : ''}
     </div>`;
+}
+function hideTopbar(){
+  const tb = document.getElementById('topbar');
+  tb.classList.add('hidden');
+  tb.innerHTML = '';
 }
 
 function setBottomnav(active){
@@ -430,16 +456,17 @@ function render(){
 
 /* ---- HOME ---- */
 function renderHome(){
-  setTopbar({title:'Visit Potrero', sub:'Guía de Potrero de los Funes'});
+  hideTopbar();
   setBottomnav('home');
   const featured = BUSINESSES.filter(b=>b.featured);
   const top = BUSINESSES.filter(b=>b.top);
   const view = document.getElementById('view');
   view.innerHTML = `
     <div class="home-panel">
-      <div class="eyebrow">VISIT POTRERO · SAN LUIS, ARGENTINA</div>
-      <h1>Potrero de los Funes</h1>
-      <p>Descubrí dónde hospedarte, comer y qué hacer hoy.</p>
+      <div class="panel-topbar">
+        <div class="brand"><span class="logo-ic">🏔️</span>Visit Potrero</div>
+        <button class="menu-btn" onclick="navigate('/buscar')">☰</button>
+      </div>
       <div class="searchbar" style="margin-bottom:16px;cursor:pointer;" onclick="navigate('/buscar')">
         <span>🔎</span><span style="color:var(--muted);font-size:14px;">Buscá tu comercio</span>
       </div>
