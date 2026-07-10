@@ -263,7 +263,7 @@ function setTab(key){ activeTab = key; renderTabs(); renderContent(); }
 
 function renderContent(){
   const el = document.getElementById('content');
-  if(activeTab==='comercios') return el.innerHTML = renderComerciosList();
+  if(activeTab==='comercios'){ el.innerHTML = renderComerciosList(); renderComerciosItems(); return; }
   if(activeTab==='lugares') return el.innerHTML = renderLugaresList();
   if(activeTab==='eventos') return el.innerHTML = renderEventList(EVENTS, 'eventos', 'Eventos');
   if(activeTab==='novedades') return el.innerHTML = renderEventList(NOVEDADES, 'novedades', 'Novedades');
@@ -271,43 +271,72 @@ function renderContent(){
 }
 
 /* ============ COMERCIOS ============ */
+let comerciosFilterCat = 'all';
+let comerciosFilterQ = '';
+
 function renderComerciosList(){
-  const items = BUSINESSES;
+  const filterPills = ['all', ...CATEGORIES.map(c=>c.slug)].map(slug=>{
+    const label = slug==='all' ? 'Todas' : cat(slug).emoji+' '+cat(slug).label;
+    return `<button class="tab-btn ${comerciosFilterCat===slug?'active':''}" onclick="setComerciosFilterCat('${slug}')">${label}</button>`;
+  }).join('');
   return `
     <div class="section-title">
-      <h2>Comercios <span class="count">(${items.length})</span></h2>
+      <h2>Comercios <span class="count" id="comerciosCount"></span></h2>
       <button class="btn btn-primary btn-sm" onclick="openComercioForm()">+ Agregar comercio</button>
     </div>
-    <div class="list">
-      ${items.length ? items.map(b=>{
-        const c = cat(b.category);
-        return `<div class="row-card">
-          <div class="row-thumb" style="background:${c.color}">${b.photo ? `<img src="${esc(b.photo)}">` : c.emoji}</div>
-          <div class="row-info">
-            <div class="row-name">${esc(b.name)}
-              ${b.top?'<span class="pill-tag top">★ TOP</span>':''}
-              ${b.featured?'<span class="pill-tag featured">☆ Destacado</span>':''}
-              <span class="pill-tag ${b.open?'':'closed'}">${b.open?'Abierto':'Cerrado'}</span>
-            </div>
-            <div class="row-meta">${c.emoji} ${c.label} · ${esc(b.address)}</div>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-outline btn-sm" onclick="openComercioForm('${b.id}')">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteComercio('${b.id}')">Borrar</button>
-          </div>
-        </div>`;
-      }).join('') : `<div class="empty">Todavía no hay comercios cargados.</div>`}
+    <div class="field" style="max-width:320px;">
+      <input type="text" id="comerciosSearchInput" placeholder="Buscar por nombre o dirección..." value="${esc(comerciosFilterQ)}" oninput="comerciosFilterQ=this.value; renderComerciosItems();">
     </div>
+    <div class="tabs" style="margin-bottom:16px;">${filterPills}</div>
+    <div class="list" id="comerciosItems"></div>
   `;
+}
+
+function renderComerciosItems(){
+  const items = BUSINESSES.filter(b=>{
+    const matchCat = comerciosFilterCat==='all' || b.category===comerciosFilterCat;
+    const q = comerciosFilterQ.trim().toLowerCase();
+    const matchQ = !q || b.name.toLowerCase().includes(q) || b.address.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  const countEl = document.getElementById('comerciosCount');
+  if(countEl) countEl.textContent = `(${items.length} de ${BUSINESSES.length})`;
+  document.getElementById('comerciosItems').innerHTML = items.length ? items.map(b=>{
+    const c = cat(b.category);
+    return `<div class="row-card">
+      <div class="row-thumb" style="background:${c.color}">${b.photo ? `<img src="${esc(b.photo)}">` : c.emoji}</div>
+      <div class="row-info">
+        <div class="row-name">${esc(b.name)}
+          ${b.top?'<span class="pill-tag top">★ TOP</span>':''}
+          ${b.featured?'<span class="pill-tag featured">☆ Destacado</span>':''}
+          <span class="pill-tag ${b.open?'':'closed'}">${b.open?'Abierto':'Cerrado'}</span>
+        </div>
+        <div class="row-meta">${c.emoji} ${c.label}${b.subcategory ? ' · '+esc(b.subcategory) : ''} · ${esc(b.address)}</div>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-outline btn-sm" onclick="openComercioForm('${b.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteComercio('${b.id}')">Borrar</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty">No hay comercios que coincidan con el filtro.</div>`;
+}
+
+function setComerciosFilterCat(slug){
+  comerciosFilterCat = slug;
+  renderContent(); // re-renderiza toda la sección para actualizar qué pill está activa
 }
 
 function openComercioForm(id){
   const editing = !!id;
   const b = editing ? BUSINESSES.find(x=>x.id===id) : {
     name:'', category:CATEGORIES[0].slug, address:'', desc:'', phone:'', hours:'',
+    email:'', web:'', instagram:'',
     open:true, top:false, featured:false, photo:'', lat:'', lng:''
   };
   formPhotoValue = b.photo || '';
+  previewOverrideSrc = '';
+  pendingPhotoBlob = null;
+  pendingPhotoFilename = '';
   const html = `
     <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
       <div class="modal">
@@ -320,10 +349,11 @@ function openComercioForm(id){
         <div class="field-row">
           <div class="field">
             <label>Categoría *</label>
-            <select id="f_category">
+            <select id="f_category" onchange="renderSubcategoryOptions(this.value, '')">
               ${CATEGORIES.map(c=>`<option value="${c.slug}" ${b.category===c.slug?'selected':''}>${c.emoji} ${c.label}</option>`).join('')}
             </select>
           </div>
+          <div class="field" id="f_subcategory_wrap"></div>
         </div>
         <div class="field">
           <label>Dirección *</label>
@@ -343,12 +373,31 @@ function openComercioForm(id){
             <input type="text" id="f_hours" value="${esc(b.hours)}" placeholder="9:00 a 20:00">
           </div>
         </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Email <span class="hint">(opcional)</span></label>
+            <input type="email" id="f_email" value="${esc(b.email||'')}" placeholder="contacto@comercio.com">
+          </div>
+          <div class="field">
+            <label>Sitio web <span class="hint">(opcional)</span></label>
+            <input type="text" id="f_web" value="${esc(b.web||'')}" placeholder="https://...">
+          </div>
+        </div>
+        <div class="field">
+          <label>Instagram <span class="hint">(opcional)</span></label>
+          <input type="text" id="f_instagram" value="${esc(b.instagram||'')}" placeholder="@usuario  ó  https://instagram.com/usuario">
+        </div>
         <div class="field">
           <label>Foto del comercio <span class="hint">(si no cargás una, se muestra una de ejemplo)</span></label>
           <div id="photoPreviewWrap" style="margin-bottom:8px;"></div>
           <input type="file" id="f_photo_file" accept="image/*" onchange="handlePhotoFile(event)">
-          <div class="hint" style="display:block;margin:8px 0 4px;">— o pegá el link de una imagen que ya esté en internet —</div>
-          <input type="url" id="f_photo_url" value="${(b.photo && !b.photo.startsWith('data:')) ? esc(b.photo) : ''}" placeholder="https://..." onchange="formPhotoValue=this.value.trim(); updatePhotoPreview();">
+          <div id="photoDownloadHint" style="display:none;background:var(--primary-light);border:1px solid #D9F99D;border-radius:10px;padding:9px 11px;margin-top:8px;font-size:11px;line-height:1.5;color:var(--primary-dark);">
+            <b style="color:var(--ink)">Pasos:</b> 1) descargá la imagen optimizada
+            <button type="button" class="btn btn-outline btn-sm" style="margin:2px 4px;" onclick="downloadPendingPhoto()">⬇ Descargar imagen</button>
+            2) subila a la carpeta <code>images/</code> de tu repositorio en GitHub (junto a <code>data.js</code>), igual que hiciste con los otros archivos.
+          </div>
+          <div class="hint" style="display:block;margin:10px 0 4px;">— o escribí la ruta / link de una imagen que ya subiste —</div>
+          <input type="text" id="f_photo_path" value="${esc(formPhotoValue)}" placeholder="images/nombre-del-comercio.jpg  ó  https://..." onchange="formPhotoValue=this.value.trim(); previewOverrideSrc=''; updatePhotoPreview();">
         </div>
         <div class="field-row">
           <div class="field">
@@ -374,17 +423,44 @@ function openComercioForm(id){
   `;
   document.getElementById('modalRoot').innerHTML = html;
   updatePhotoPreview();
+  renderSubcategoryOptions(b.category, b.subcategory || '');
 }
 
-/* ---- Foto: subida con vista previa (se guarda como imagen incrustada) o link externo ---- */
+function renderSubcategoryOptions(categorySlug, currentValue){
+  const wrap = document.getElementById('f_subcategory_wrap');
+  if(!wrap) return;
+  const list = (typeof SUBCATEGORIES !== 'undefined' && SUBCATEGORIES[categorySlug]) || [];
+  if(list.length){
+    wrap.innerHTML = `
+      <label>Subcategoría</label>
+      <select id="f_subcategory">
+        <option value="">Sin subcategoría</option>
+        ${list.map(sc=>`<option value="${esc(sc)}" ${currentValue===sc?'selected':''}>${esc(sc)}</option>`).join('')}
+      </select>
+    `;
+  } else {
+    wrap.innerHTML = `
+      <label>Subcategoría <span class="hint">(opcional)</span></label>
+      <input type="text" id="f_subcategory" value="${esc(currentValue)}" placeholder="Ej: Boutique, Almacén...">
+    `;
+  }
+}
+
+/* ---- Foto: la imagen se guarda como ARCHIVO en la carpeta images/ del repo, no adentro
+   de data.js (para que no se ponga pesado). El panel arma el archivo optimizado, vos lo
+   descargás y lo subís a GitHub; el campo del comercio solo guarda la ruta "images/xxx.jpg". ---- */
 let formPhotoValue = '';
+let previewOverrideSrc = '';
+let pendingPhotoBlob = null;
+let pendingPhotoFilename = '';
 
 function updatePhotoPreview(){
   const wrap = document.getElementById('photoPreviewWrap');
   if(!wrap) return;
-  wrap.innerHTML = formPhotoValue
+  const src = previewOverrideSrc || formPhotoValue;
+  wrap.innerHTML = src
     ? `<div style="position:relative;display:inline-block;">
-         <img src="${formPhotoValue}" style="width:130px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;">
+         <img src="${src}" onerror="this.style.opacity=.25" style="width:130px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;background:var(--bg);">
          <button type="button" onclick="removePhoto()" title="Quitar foto"
            style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:2px solid #fff;font-size:12px;cursor:pointer;line-height:1;">✕</button>
        </div>`
@@ -393,14 +469,19 @@ function updatePhotoPreview(){
 
 function removePhoto(){
   formPhotoValue = '';
+  previewOverrideSrc = '';
+  pendingPhotoBlob = null;
+  pendingPhotoFilename = '';
   const fileInput = document.getElementById('f_photo_file');
-  const urlInput = document.getElementById('f_photo_url');
+  const pathInput = document.getElementById('f_photo_path');
+  const hint = document.getElementById('photoDownloadHint');
   if(fileInput) fileInput.value = '';
-  if(urlInput) urlInput.value = '';
+  if(pathInput) pathInput.value = '';
+  if(hint) hint.style.display = 'none';
   updatePhotoPreview();
 }
 
-function resizeAndCompressImage(file, maxDim, quality){
+function processImageFile(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onload = (e)=>{
@@ -412,7 +493,11 @@ function resizeAndCompressImage(file, maxDim, quality){
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        canvas.toBlob((blob)=>{
+          if(!blob){ reject(new Error('No se pudo generar la imagen')); return; }
+          resolve({dataUrl, blob});
+        }, 'image/jpeg', quality);
       };
       img.onerror = () => reject(new Error('No se pudo leer la imagen'));
       img.src = e.target.result;
@@ -427,14 +512,33 @@ async function handlePhotoFile(event){
   if(!file) return;
   if(!file.type.startsWith('image/')){ alert('Elegí un archivo de imagen (jpg, png, etc).'); return; }
   try{
-    const dataUrl = await resizeAndCompressImage(file, 900, 0.78);
-    formPhotoValue = dataUrl;
-    const urlInput = document.getElementById('f_photo_url');
-    if(urlInput) urlInput.value = ''; // la foto subida tiene prioridad sobre el link
+    const {dataUrl, blob} = await processImageFile(file, 900, 0.78);
+    const nameInput = document.getElementById('f_name');
+    const base = slugify((nameInput && nameInput.value.trim()) ? nameInput.value : ('foto-' + Date.now()));
+    pendingPhotoFilename = base + '.jpg';
+    pendingPhotoBlob = blob;
+    formPhotoValue = 'images/' + pendingPhotoFilename;
+    previewOverrideSrc = dataUrl;
+    const pathInput = document.getElementById('f_photo_path');
+    if(pathInput) pathInput.value = formPhotoValue;
+    const hint = document.getElementById('photoDownloadHint');
+    if(hint) hint.style.display = 'block';
     updatePhotoPreview();
   }catch(err){
     alert('No se pudo procesar esa imagen. Probá con otra.');
   }
+}
+
+function downloadPendingPhoto(){
+  if(!pendingPhotoBlob){ alert('Primero elegí una foto arriba.'); return; }
+  const url = URL.createObjectURL(pendingPhotoBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = pendingPhotoFilename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
 
 function saveComercio(id){
@@ -443,13 +547,18 @@ function saveComercio(id){
   if(!name || !address){ alert('Completá al menos el nombre y la dirección.'); return; }
   const latVal = document.getElementById('f_lat').value;
   const lngVal = document.getElementById('f_lng').value;
+  const subcatEl = document.getElementById('f_subcategory');
   const data = {
     name,
     category: document.getElementById('f_category').value,
+    subcategory: subcatEl ? subcatEl.value.trim() : '',
     address,
     desc: document.getElementById('f_desc').value.trim(),
     phone: document.getElementById('f_phone').value.trim(),
     hours: document.getElementById('f_hours').value.trim(),
+    email: document.getElementById('f_email').value.trim(),
+    web: document.getElementById('f_web').value.trim(),
+    instagram: document.getElementById('f_instagram').value.trim(),
     photo: formPhotoValue.trim(),
     open: document.getElementById('f_open').checked,
     top: document.getElementById('f_top').checked,
