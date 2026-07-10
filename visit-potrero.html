@@ -815,18 +815,29 @@ function renderBuscar(){
     <div class="filter-row" id="filterRow"></div>
     <div class="biz-list" id="results"></div>
   `;
-  document.getElementById('filterRow').innerHTML = ['all',...CATEGORIES.map(c=>c.slug)].map(slug=>{
-    const label = slug==='all' ? 'Todas' : cat(slug).emoji+' '+cat(slug).label;
-    return `<button class="filter-pill ${searchState.cat===slug?'active':''}" onclick="setSearchCat('${slug}')">${label}</button>`;
-  }).join('');
+  renderFilterRow();
   lockHorizontalSwipe('filterRow');
-  document.getElementById('searchInput').addEventListener('input', e=>{
+  const input = document.getElementById('searchInput');
+  input.addEventListener('input', e=>{
     searchState.q = e.target.value;
     renderResults();
   });
   renderResults();
+  // Foco automático para que el teclado se abra sin necesidad de un segundo toque.
+  requestAnimationFrame(() => input.focus());
 }
-function setSearchCat(slug){ searchState.cat = slug; renderBuscar(); }
+function renderFilterRow(){
+  document.getElementById('filterRow').innerHTML = ['all',...CATEGORIES.map(c=>c.slug)].map(slug=>{
+    const label = slug==='all' ? 'Todas' : cat(slug).emoji+' '+cat(slug).label;
+    return `<button class="filter-pill ${searchState.cat===slug?'active':''}" onclick="setSearchCat('${slug}')">${label}</button>`;
+  }).join('');
+}
+function setSearchCat(slug){
+  searchState.cat = slug;
+  renderFilterRow(); // no reconstruye el input: no pierde el foco ni el texto tipeado
+  lockHorizontalSwipe('filterRow');
+  renderResults();
+}
 function renderResults(){
   const q = searchState.q.trim().toLowerCase();
   let items = BUSINESSES.filter(b=>{
