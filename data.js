@@ -1,6 +1,6 @@
 /* ==========================================================================
    VISIT POTRERO — datos del sitio
-   Generado por el panel de edición (admin.html) el 10/7/2026, 03:17:05.
+   Generado por el panel de edición (admin.html) el 10/7/2026, 04:15:31.
    Reemplazá el data.js de tu repositorio por este archivo para publicar los cambios.
 ========================================================================== */
 
@@ -56,8 +56,27 @@ const CATEGORIES = [
 ];
 
 const SUBCATEGORIES = {
-  "gastronomia": ["Resto", "Cafetería", "Bar", "Pizzería", "Parrilla", "Rotisería", "Menu Serrano", "BNA"],
-  "alojamiento": ["Cabañas", "Complejo", "Casa", "Apart Hotel", "Hostería", "Hotel", "Posada", "Departamentos", "Hostal"]
+  "gastronomia": [
+    "Resto",
+    "Cafetería",
+    "Bar",
+    "Pizzería",
+    "Parrilla",
+    "Rotisería",
+    "Menu Serrano",
+    "BNA"
+  ],
+  "alojamiento": [
+    "Cabañas",
+    "Complejo",
+    "Casa",
+    "Apart Hotel",
+    "Hostería",
+    "Hotel",
+    "Posada",
+    "Departamentos",
+    "Hostal"
+  ]
 };
 
 const CENTER = [
@@ -702,7 +721,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2309,
+    "lng": -66.2749
   },
   {
     "id": "aitue",
@@ -719,7 +740,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2198,
+    "lng": -66.2638
   },
   {
     "id": "ak-tu-lugar",
@@ -739,7 +762,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2387,
+    "lng": -66.2527
   },
   {
     "id": "amantea-apart-hotel",
@@ -759,7 +784,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2276,
+    "lng": -66.2716
   },
   {
     "id": "antu-kuyen",
@@ -779,7 +806,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2465,
+    "lng": -66.26050000000001
   },
   {
     "id": "apart-altos-de-aliwen",
@@ -799,7 +828,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2354,
+    "lng": -66.2794
   },
   {
     "id": "aroma-de-potrero",
@@ -819,7 +850,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2243,
+    "lng": -66.2683
   },
   {
     "id": "augurios-del-sol-2",
@@ -839,7 +872,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2432,
+    "lng": -66.2572
   },
   {
     "id": "ayres-de-funes",
@@ -859,7 +894,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2321,
+    "lng": -66.2761
   },
   {
     "id": "balcones-del-lago",
@@ -879,7 +916,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.221,
+    "lng": -66.265
   },
   {
     "id": "bella-vista",
@@ -899,7 +938,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2399,
+    "lng": -66.2539
   },
   {
     "id": "brisa-del-lago",
@@ -919,7 +960,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2288,
+    "lng": -66.2728
   },
   {
     "id": "brisa-serrana",
@@ -939,7 +982,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2477,
+    "lng": -66.2617
   },
   {
     "id": "cabanas-holtfor",
@@ -959,7 +1004,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2366,
+    "lng": -66.2506
   },
   {
     "id": "cabanas-inaki-anexo-cafeteria",
@@ -979,7 +1026,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2255,
+    "lng": -66.2695
   },
   {
     "id": "cabanas-lucero",
@@ -999,7 +1048,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2444,
+    "lng": -66.2584
   },
   {
     "id": "casa-alquiler-por-dia",
@@ -1019,7 +1070,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2333,
+    "lng": -66.2773
   },
   {
     "id": "casa-de-las-flores",
@@ -1039,7 +1092,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2222,
+    "lng": -66.2662
   },
   {
     "id": "casa-majo",
@@ -1059,7 +1114,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2411,
+    "lng": -66.2551
   },
   {
     "id": "castillo-de-sol",
@@ -1079,7 +1136,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.23,
+    "lng": -66.274
   },
   {
     "id": "cefiro",
@@ -1099,7 +1158,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2189,
+    "lng": -66.2629
   },
   {
     "id": "claro-de-luna",
@@ -1119,7 +1180,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2378,
+    "lng": -66.2518
   },
   {
     "id": "colores-de-los-funes",
@@ -1139,7 +1202,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2267,
+    "lng": -66.2707
   },
   {
     "id": "complejo-el-mirador",
@@ -1159,7 +1224,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2456,
+    "lng": -66.2596
   },
   {
     "id": "cumelem",
@@ -1179,7 +1246,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2345,
+    "lng": -66.2785
   },
   {
     "id": "del-duende",
@@ -1199,7 +1268,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2234,
+    "lng": -66.2674
   },
   {
     "id": "del-fuego",
@@ -1219,7 +1290,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2423,
+    "lng": -66.2563
   },
   {
     "id": "destello-del-lago",
@@ -1239,7 +1312,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2312,
+    "lng": -66.2752
   },
   {
     "id": "dona-emilia",
@@ -1259,7 +1334,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2201,
+    "lng": -66.2641
   },
   {
     "id": "el-colibri",
@@ -1279,7 +1356,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.239,
+    "lng": -66.253
   },
   {
     "id": "el-crepusculo",
@@ -1299,7 +1378,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2279,
+    "lng": -66.2719
   },
   {
     "id": "el-fin-del-afan",
@@ -1319,7 +1400,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2468,
+    "lng": -66.2608
   },
   {
     "id": "el-nogal",
@@ -1339,7 +1422,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2357,
+    "lng": -66.2797
   },
   {
     "id": "el-reparo",
@@ -1359,7 +1444,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2246,
+    "lng": -66.2686
   },
   {
     "id": "el-triunfo-apart",
@@ -1379,7 +1466,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2435,
+    "lng": -66.25750000000001
   },
   {
     "id": "encanto-puntano",
@@ -1399,7 +1488,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2324,
+    "lng": -66.2764
   },
   {
     "id": "estacion-potrero",
@@ -1419,7 +1510,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2213,
+    "lng": -66.2653
   },
   {
     "id": "eureka",
@@ -1439,7 +1532,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2402,
+    "lng": -66.2542
   },
   {
     "id": "gemas-del-lago",
@@ -1459,7 +1554,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2291,
+    "lng": -66.2731
   },
   {
     "id": "hosteria-lihuen",
@@ -1479,7 +1576,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.248,
+    "lng": -66.262
   },
   {
     "id": "hotel-potrero-de-los-funes",
@@ -1499,7 +1598,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2369,
+    "lng": -66.2509
   },
   {
     "id": "hotel-puntano",
@@ -1541,7 +1642,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2447,
+    "lng": -66.2587
   },
   {
     "id": "kume",
@@ -1561,7 +1664,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2336,
+    "lng": -66.2776
   },
   {
     "id": "la-casa-de-mune",
@@ -1581,7 +1686,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2225,
+    "lng": -66.2665
   },
   {
     "id": "la-casa-del-tata-hostal",
@@ -1601,7 +1708,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2414,
+    "lng": -66.2554
   },
   {
     "id": "la-colina",
@@ -1621,7 +1730,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2303,
+    "lng": -66.2743
   },
   {
     "id": "la-gringa",
@@ -1641,7 +1752,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2192,
+    "lng": -66.2632
   },
   {
     "id": "la-lomita",
@@ -1661,7 +1774,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2381,
+    "lng": -66.2521
   },
   {
     "id": "la-mamalia-casa-en-alquiler",
@@ -1681,7 +1796,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.227,
+    "lng": -66.271
   },
   {
     "id": "la-norma-casa-en-alquiler",
@@ -1701,7 +1818,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2459,
+    "lng": -66.2599
   },
   {
     "id": "la-quebrada-apart-hotel",
@@ -1721,7 +1840,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2348,
+    "lng": -66.2788
   },
   {
     "id": "la-soleada",
@@ -1741,7 +1862,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2237,
+    "lng": -66.2677
   },
   {
     "id": "las-acacias",
@@ -1761,7 +1884,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2426,
+    "lng": -66.2566
   },
   {
     "id": "las-encinas",
@@ -1781,7 +1906,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2315,
+    "lng": -66.2755
   },
   {
     "id": "las-mercedes",
@@ -1801,7 +1928,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2204,
+    "lng": -66.2644
   },
   {
     "id": "las-piedras",
@@ -1821,7 +1950,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2393,
+    "lng": -66.2533
   },
   {
     "id": "las-torcazas",
@@ -1841,7 +1972,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2282,
+    "lng": -66.2722
   },
   {
     "id": "lo-de-esther",
@@ -1861,7 +1994,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2471,
+    "lng": -66.2611
   },
   {
     "id": "los-alelies",
@@ -1881,7 +2016,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.236,
+    "lng": -66.28
   },
   {
     "id": "los-arroyitos",
@@ -1901,7 +2038,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2249,
+    "lng": -66.2689
   },
   {
     "id": "los-fresnos",
@@ -1921,7 +2060,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2438,
+    "lng": -66.2578
   },
   {
     "id": "los-molles",
@@ -1941,7 +2082,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2327,
+    "lng": -66.2767
   },
   {
     "id": "los-naranjos",
@@ -1961,7 +2104,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2216,
+    "lng": -66.2656
   },
   {
     "id": "los-paraisos",
@@ -1981,7 +2126,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2405,
+    "lng": -66.25450000000001
   },
   {
     "id": "los-pinos-1",
@@ -2001,7 +2148,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2294,
+    "lng": -66.2734
   },
   {
     "id": "ludmar",
@@ -2021,7 +2170,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2483,
+    "lng": -66.2623
   },
   {
     "id": "lunamakena-2",
@@ -2041,7 +2192,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2372,
+    "lng": -66.2512
   },
   {
     "id": "lunas-y-soles-2",
@@ -2061,7 +2214,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2261,
+    "lng": -66.2701
   },
   {
     "id": "mirando-al-valle",
@@ -2081,7 +2236,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.245,
+    "lng": -66.259
   },
   {
     "id": "molinos-de-vientos",
@@ -2101,7 +2258,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2339,
+    "lng": -66.2779
   },
   {
     "id": "montearena",
@@ -2121,7 +2280,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2228,
+    "lng": -66.2668
   },
   {
     "id": "munay",
@@ -2141,7 +2302,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2417,
+    "lng": -66.2557
   },
   {
     "id": "murmullo-del-rio",
@@ -2161,7 +2324,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2306,
+    "lng": -66.2746
   },
   {
     "id": "naife",
@@ -2181,7 +2346,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2195,
+    "lng": -66.26350000000001
   },
   {
     "id": "oasis-apart",
@@ -2201,7 +2368,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2384,
+    "lng": -66.2524
   },
   {
     "id": "oliber-cabanas",
@@ -2221,7 +2390,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2273,
+    "lng": -66.2713
   },
   {
     "id": "pauvalen-1-y-2",
@@ -2241,7 +2412,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2462,
+    "lng": -66.2602
   },
   {
     "id": "pisco-yaku",
@@ -2261,7 +2434,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2351,
+    "lng": -66.2791
   },
   {
     "id": "posada-spa-terrazas",
@@ -2281,7 +2456,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.224,
+    "lng": -66.268
   },
   {
     "id": "posada-valle-del-sol",
@@ -2301,7 +2478,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2429,
+    "lng": -66.2569
   },
   {
     "id": "pueblo-de-jesus",
@@ -2321,7 +2500,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2318,
+    "lng": -66.2758
   },
   {
     "id": "quela",
@@ -2341,7 +2522,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2207,
+    "lng": -66.2647
   },
   {
     "id": "ramadas",
@@ -2361,7 +2544,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2396,
+    "lng": -66.2536
   },
   {
     "id": "ranchito-de-suenos",
@@ -2381,7 +2566,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2285,
+    "lng": -66.2725
   },
   {
     "id": "retana",
@@ -2401,7 +2588,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2474,
+    "lng": -66.2614
   },
   {
     "id": "rincon-del-rio",
@@ -2421,7 +2610,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2363,
+    "lng": -66.2503
   },
   {
     "id": "rincon-potrero",
@@ -2441,7 +2632,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2252,
+    "lng": -66.2692
   },
   {
     "id": "ruca-kiyen",
@@ -2461,7 +2654,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2441,
+    "lng": -66.2581
   },
   {
     "id": "sol-dorado",
@@ -2481,7 +2676,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.233,
+    "lng": -66.277
   },
   {
     "id": "solares-de-potrero",
@@ -2501,7 +2698,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2219,
+    "lng": -66.2659
   },
   {
     "id": "sololosta-cabanas",
@@ -2521,7 +2720,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2408,
+    "lng": -66.2548
   },
   {
     "id": "tata-y-la-emilia",
@@ -2541,7 +2742,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2297,
+    "lng": -66.2737
   },
   {
     "id": "terra-soles",
@@ -2561,7 +2764,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2186,
+    "lng": -66.2626
   },
   {
     "id": "tronco-silvestre",
@@ -2581,7 +2786,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2375,
+    "lng": -66.25150000000001
   },
   {
     "id": "turmalina",
@@ -2601,7 +2808,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2264,
+    "lng": -66.2704
   },
   {
     "id": "valle-la-vaguada",
@@ -2621,7 +2830,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2453,
+    "lng": -66.2593
   },
   {
     "id": "villa-king",
@@ -2641,7 +2852,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2342,
+    "lng": -66.2782
   },
   {
     "id": "villa-las-lomas",
@@ -2661,7 +2874,9 @@ const BUSINESSES = [
     "photo": "",
     "open": true,
     "top": false,
-    "featured": false
+    "featured": false,
+    "lat": -33.2231,
+    "lng": -66.2671
   }
 ];
 
