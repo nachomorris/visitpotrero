@@ -167,14 +167,15 @@
   /* Business list */
   .biz-list{display:flex;flex-direction:column;gap:10px;}
   .biz-card{
-    display:flex;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:10px;box-shadow:var(--shadow);cursor:pointer;
+    display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:18px;
+    overflow:hidden;box-shadow:var(--shadow);cursor:pointer;min-height:128px;
   }
   .biz-card .thumb{
-    width:64px;height:64px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;
-    font-size:24px;color:#fff;
+    width:132px;flex:none;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;
   }
-  .biz-card .info{flex:1;min-width:0;}
+  .biz-card .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .biz-card .info{flex:1;min-width:0;padding:14px 14px 14px 16px;display:flex;flex-direction:column;justify-content:center;}
   .biz-card .badges{display:flex;gap:6px;align-items:center;margin-bottom:2px;flex-wrap:wrap;}
   .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;}
   .badge.top{background:var(--ink);color:var(--primary);}
@@ -413,9 +414,12 @@ function allItems(){
 function getBusiness(id){ return BUSINESSES.find(b=>b.id===id); }
 function getPlace(id){ return PLACES.find(p=>p.id===id); }
 
-function bizThumb(b, size){
+function bizThumb(b, i){
   const c = cat(b.category);
-  return `<div class="thumb" style="background:${c.color};width:${size||64}px;height:${size||64}px;font-size:${size?Math.round(size*0.4):24}px;">${c.emoji}</div>`;
+  const photo = b.photo || SAMPLE_PHOTOS[(i||0) % SAMPLE_PHOTOS.length];
+  return `<div class="thumb" style="background:${c.color}">
+    ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
+  </div>`;
 }
 
 function badgesFor(b){
@@ -426,15 +430,15 @@ function badgesFor(b){
   return h;
 }
 
-function bizCard(b){
+function bizCard(b, i){
   return `<div class="biz-card" onclick="navigate('/comercio/${b.id}')">
-    ${bizThumb(b)}
     <div class="info">
       <div class="badges">${badgesFor(b)}</div>
       <div class="name">${b.name}</div>
       <div class="cat">${cat(b.category).label}</div>
       <div class="addr">📍 ${b.address}</div>
     </div>
+    ${bizThumb(b, i)}
   </div>`;
 }
 
