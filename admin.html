@@ -307,6 +307,7 @@ function openComercioForm(id){
     name:'', category:CATEGORIES[0].slug, address:'', desc:'', phone:'', hours:'',
     open:true, top:false, featured:false, photo:'', lat:'', lng:''
   };
+  formPhotoValue = b.photo || '';
   const html = `
     <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
       <div class="modal">
@@ -343,8 +344,11 @@ function openComercioForm(id){
           </div>
         </div>
         <div class="field">
-          <label>Foto <span class="hint">(URL de una imagen — opcional, si no ponés queda una de ejemplo)</span></label>
-          <input type="url" id="f_photo" value="${esc(b.photo)}" placeholder="https://...">
+          <label>Foto del comercio <span class="hint">(si no cargás una, se muestra una de ejemplo)</span></label>
+          <div id="photoPreviewWrap" style="margin-bottom:8px;"></div>
+          <input type="file" id="f_photo_file" accept="image/*" onchange="handlePhotoFile(event)">
+          <div class="hint" style="display:block;margin:8px 0 4px;">— o pegá el link de una imagen que ya esté en internet —</div>
+          <input type="url" id="f_photo_url" value="${(b.photo && !b.photo.startsWith('data:')) ? esc(b.photo) : ''}" placeholder="https://..." onchange="formPhotoValue=this.value.trim(); updatePhotoPreview();">
         </div>
         <div class="field-row">
           <div class="field">
@@ -369,6 +373,68 @@ function openComercioForm(id){
     </div>
   `;
   document.getElementById('modalRoot').innerHTML = html;
+  updatePhotoPreview();
+}
+
+/* ---- Foto: subida con vista previa (se guarda como imagen incrustada) o link externo ---- */
+let formPhotoValue = '';
+
+function updatePhotoPreview(){
+  const wrap = document.getElementById('photoPreviewWrap');
+  if(!wrap) return;
+  wrap.innerHTML = formPhotoValue
+    ? `<div style="position:relative;display:inline-block;">
+         <img src="${formPhotoValue}" style="width:130px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;">
+         <button type="button" onclick="removePhoto()" title="Quitar foto"
+           style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:2px solid #fff;font-size:12px;cursor:pointer;line-height:1;">✕</button>
+       </div>`
+    : `<div style="width:130px;height:96px;border-radius:10px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10.5px;text-align:center;padding:6px;">Sin foto propia<br>(se usa una de ejemplo)</div>`;
+}
+
+function removePhoto(){
+  formPhotoValue = '';
+  const fileInput = document.getElementById('f_photo_file');
+  const urlInput = document.getElementById('f_photo_url');
+  if(fileInput) fileInput.value = '';
+  if(urlInput) urlInput.value = '';
+  updatePhotoPreview();
+}
+
+function resizeAndCompressImage(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePhotoFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ alert('Elegí un archivo de imagen (jpg, png, etc).'); return; }
+  try{
+    const dataUrl = await resizeAndCompressImage(file, 900, 0.78);
+    formPhotoValue = dataUrl;
+    const urlInput = document.getElementById('f_photo_url');
+    if(urlInput) urlInput.value = ''; // la foto subida tiene prioridad sobre el link
+    updatePhotoPreview();
+  }catch(err){
+    alert('No se pudo procesar esa imagen. Probá con otra.');
+  }
 }
 
 function saveComercio(id){
@@ -384,7 +450,7 @@ function saveComercio(id){
     desc: document.getElementById('f_desc').value.trim(),
     phone: document.getElementById('f_phone').value.trim(),
     hours: document.getElementById('f_hours').value.trim(),
-    photo: document.getElementById('f_photo').value.trim(),
+    photo: formPhotoValue.trim(),
     open: document.getElementById('f_open').checked,
     top: document.getElementById('f_top').checked,
     featured: document.getElementById('f_featured').checked,

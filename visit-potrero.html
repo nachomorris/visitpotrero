@@ -236,7 +236,8 @@
   .filter-pill.active{background:var(--ink);border-color:var(--ink);color:var(--primary);}
 
   /* Detail page */
-  .detail-hero{height:180px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--primary);background:var(--ink);margin-bottom:16px;}
+  .detail-hero{height:180px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--primary);background:var(--ink);margin-bottom:16px;overflow:hidden;position:relative;}
+  .detail-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .detail-title{font-size:21px;font-weight:800;margin:0 0 4px;}
   .detail-cat{font-size:13px;color:var(--primary-dark);font-weight:700;margin-bottom:10px;}
   .detail-badges{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
@@ -354,9 +355,18 @@ function allItems(){
 function getBusiness(id){ return BUSINESSES.find(b=>b.id===id); }
 function getPlace(id){ return PLACES.find(p=>p.id===id); }
 
-function bizThumb(b, i){
+// Elige siempre la misma foto de ejemplo para un mismo comercio (según su id),
+// sin importar en qué lista/orden aparezca — así la card y la ficha coinciden.
+function photoForBusiness(b){
+  if(b.photo) return b.photo;
+  let hash = 0;
+  for(let i=0;i<b.id.length;i++){ hash = (hash*31 + b.id.charCodeAt(i)) >>> 0; }
+  return SAMPLE_PHOTOS[hash % SAMPLE_PHOTOS.length];
+}
+
+function bizThumb(b){
   const c = cat(b.category);
-  const photo = b.photo || SAMPLE_PHOTOS[(i||0) % SAMPLE_PHOTOS.length];
+  const photo = photoForBusiness(b);
   return `<div class="thumb" style="background:${c.color}">
     ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
   </div>`;
@@ -385,7 +395,7 @@ function bizCard(b, i){
 function promoCard(b, i){
   const c = cat(b.category);
   const highlight = b.top ? '★ Top de Potrero' : (b.featured ? '☆ Recomendado' : c.label);
-  const photo = b.photo || SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
+  const photo = photoForBusiness(b);
   return `<div class="promo-card reveal" style="transition-delay:${(i%4)*70}ms" onclick="navigate('/comercio/${b.id}')">
     <div class="promo-img" style="background:${c.color}">
       ${photo ? `<img src="${photo}" alt="${b.name}" loading="lazy">` : c.emoji}
@@ -724,11 +734,43 @@ function setSearchCat(slug){
   lockHorizontalSwipe('filterRow');
   renderResults();
 }
+/* ---- Búsqueda tolerante a acentos y pequeños errores de tipeo ---- */
+function normalizeText(s){
+  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  if(m===0) return n;
+  if(n===0) return m;
+  const dp = Array.from({length:m+1}, (_,i)=>[i, ...new Array(n).fill(0)]);
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
+    }
+  }
+  return dp[m][n];
+}
+function fuzzyMatch(query, text){
+  const nq = normalizeText(query);
+  const nt = normalizeText(text);
+  if(!nq) return true;
+  if(nt.includes(nq)) return true; // coincidencia directa (ya sin acentos)
+  const queryWords = nq.split(/\s+/).filter(Boolean);
+  const textWords = nt.split(/\s+/).filter(Boolean);
+  return queryWords.every(qw => {
+    if(textWords.some(tw => tw.includes(qw) || qw.includes(tw))) return true;
+    const maxDist = qw.length <= 4 ? 1 : (qw.length <= 8 ? 2 : 3);
+    return textWords.some(tw => levenshtein(qw, tw) <= maxDist);
+  });
+}
+
 function renderResults(){
-  const q = searchState.q.trim().toLowerCase();
+  const q = searchState.q.trim();
   let items = BUSINESSES.filter(b=>{
     const matchCat = searchState.cat==='all' || b.category===searchState.cat;
-    const matchQ = !q || b.name.toLowerCase().includes(q) || b.address.toLowerCase().includes(q);
+    const matchQ = !q || fuzzyMatch(q, b.name) || fuzzyMatch(q, b.address) || fuzzyMatch(q, cat(b.category).label);
     return matchCat && matchQ;
   });
   document.getElementById('results').innerHTML = items.length ? items.map(bizCard).join('') : `<div class="empty-state">No encontramos resultados. Probá con otra búsqueda.</div>`;
@@ -742,8 +784,11 @@ function renderComercio(id){
   const c = cat(b.category);
   setTopbar({title:b.name, sub:c.label, back:true});
   setBottomnav('');
+  const photo = photoForBusiness(b);
   document.getElementById('view').innerHTML = `
-    <div class="detail-hero">${c.emoji}</div>
+    <div class="detail-hero" style="background:${c.color}">
+      ${photo ? `<img src="${photo}" alt="${b.name}">` : c.emoji}
+    </div>
     <div class="detail-title">${b.name}</div>
     <div class="detail-cat">${c.emoji} ${c.label}</div>
     <div class="detail-badges">${badgesFor(b)}</div>
