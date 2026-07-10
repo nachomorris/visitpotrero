@@ -67,16 +67,14 @@
     margin:-16px -16px 24px;padding:14px 16px 18px;
     position:sticky;top:0;z-index:20;
     box-shadow:0 4px 16px rgba(0,0,0,.1);
-    transition:background-color .25s ease, -webkit-backdrop-filter .25s ease, backdrop-filter .25s ease, padding .28s ease;
+    transition:background-color .3s ease, padding .28s ease;
+    will-change:background-color;
   }
   .home-panel.scrolled{
     background:rgba(163,230,53,.7);
-    -webkit-backdrop-filter:blur(14px) saturate(160%);
-    backdrop-filter:blur(14px) saturate(160%);
   }
   .home-panel.scrolled.panel-active{
     background:var(--primary);
-    -webkit-backdrop-filter:none;backdrop-filter:none;
   }
   .panel-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .panel-topbar .brand{
@@ -534,12 +532,14 @@ let homeScrollHandler = null;
 let homeLastScrollY = 0;
 let homeTicking = false;
 let homeIsCollapsed = false;
+let homeIsScrolled = false;
 function setupHomePanelFade(){
   const panel = document.querySelector('.home-panel');
   if(!panel) return;
   if(homeScrollHandler) window.removeEventListener('scroll', homeScrollHandler);
   homeLastScrollY = window.scrollY;
   homeIsCollapsed = false;
+  homeIsScrolled = false;
   homeTicking = false;
 
   const update = () => {
@@ -548,12 +548,17 @@ function setupHomePanelFade(){
     if(!p){ window.removeEventListener('scroll', homeScrollHandler); homeScrollHandler = null; return; }
     const y = Math.max(0, window.scrollY);
     const delta = y - homeLastScrollY;
-    p.classList.toggle('scrolled', y > 8);
+
+    // Histéresis: umbrales distintos para activar/desactivar, evita parpadeo cerca del límite
+    if(y > 24) homeIsScrolled = true;
+    else if(y < 6) homeIsScrolled = false;
+    p.classList.toggle('scrolled', homeIsScrolled);
+
     if(y <= 8){
       homeIsCollapsed = false; // arriba del todo: se ve completo
-    } else if(delta > 10){
+    } else if(delta > 14){
       homeIsCollapsed = true; // bajando de forma sostenida: se esconden los íconos
-    } else if(delta < -10){
+    } else if(delta < -14){
       homeIsCollapsed = false; // subiendo de forma sostenida: reaparecen
     }
     // deltas chicos (jitter de scroll) no cambian el estado, evita el temblor
