@@ -171,7 +171,7 @@
   .map-cta .t3{font-size:12px;color:#cbd5e1;}
 
   /* Horizontal scroller */
-  .hscroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory;touch-action:pan-x;}
+  .hscroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x proximity;touch-action:pan-x;-webkit-overflow-scrolling:touch;}
   .hscroll::-webkit-scrollbar{display:none;}
   .place-card{
     flex:0 0 auto;width:200px;background:var(--card);border-radius:18px;overflow:hidden;
@@ -421,30 +421,13 @@ function placeCard(p, i){
   </div>`;
 }
 
-/* ============ BLOQUEO DE SWIPE HORIZONTAL (fallback para Safari/iOS) ============ */
-// `touch-action:pan-x` no siempre alcanza en Safari/iOS, así que reforzamos
-// a mano: si el dedo se mueve más en horizontal que en vertical, bloqueamos
-// el scroll vertical de la página mientras dura ese gesto.
-function lockHorizontalSwipe(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-  let startX = 0, startY = 0, axis = null;
-  el.addEventListener('touchstart', (e) => {
-    if(e.touches.length !== 1) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    axis = null;
-  }, {passive:true});
-  el.addEventListener('touchmove', (e) => {
-    if(e.touches.length !== 1) return;
-    if(axis === null){
-      const dx = Math.abs(e.touches[0].clientX - startX);
-      const dy = Math.abs(e.touches[0].clientY - startY);
-      if(dx > 6 || dy > 6) axis = dx > dy ? 'x' : 'y';
-    }
-    if(axis === 'x' && e.cancelable) e.preventDefault();
-  }, {passive:false});
-}
+/* ============ BLOQUEO DE SWIPE HORIZONTAL ============ */
+// `touch-action:pan-x` (en el CSS) ya le indica al navegador que este
+// elemento solo debe paniar en horizontal, así que el propio navegador
+// bloquea el scroll vertical de la página durante el gesto — sin
+// necesidad de interceptar el touchmove a mano (eso frenaba el scroll
+// nativo y hacía sentir el slider "trabado").
+function lockHorizontalSwipe(id){ /* no-op: manejado por CSS touch-action */ }
 
 /* ============ FLECHAS DE CATEGORÍAS ============ */
 function updateCatChevrons(){
