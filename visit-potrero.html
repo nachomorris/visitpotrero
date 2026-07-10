@@ -124,6 +124,22 @@
   .cat-chip .label{display:block;font-size:10.5px;font-weight:600;color:var(--ink);white-space:nowrap;}
   .cat-chip.active .emoji{outline:2px solid var(--ink);}
 
+  /* Flechitas de scroll de categorías (como en el menú de Pehuen) */
+  .cat-grid-wrap{position:relative;}
+  .scroll-chevron{
+    position:absolute;top:26px;transform:translateY(-50%);
+    width:26px;height:26px;border-radius:50%;
+    background:rgba(255,255,255,.92);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;border:none;cursor:pointer;padding:0;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+    transition:opacity .2s ease, visibility .2s ease;
+    z-index:2;line-height:1;
+  }
+  .scroll-chevron.left{left:-6px;}
+  .scroll-chevron.right{right:-6px;}
+  .scroll-chevron.is-hidden{opacity:0;visibility:hidden;pointer-events:none;}
+
   /* Map CTA */
   .map-cta{
     display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;border-radius:20px;
@@ -489,6 +505,28 @@ function placeCard(p, i){
   </div>`;
 }
 
+/* ============ FLECHAS DE CATEGORÍAS ============ */
+function updateCatChevrons(){
+  const grid = document.getElementById('catGrid');
+  const left = document.getElementById('catChevronLeft');
+  const right = document.getElementById('catChevronRight');
+  if(!grid || !left || !right) return;
+  const maxScroll = grid.scrollWidth - grid.clientWidth;
+  left.classList.toggle('is-hidden', grid.scrollLeft <= 4);
+  right.classList.toggle('is-hidden', maxScroll <= 4 || grid.scrollLeft >= maxScroll - 4);
+}
+function scrollCatGrid(dir){
+  const grid = document.getElementById('catGrid');
+  if(!grid) return;
+  grid.scrollBy({left: dir * 170, behavior:'smooth'});
+}
+function setupCatChevrons(){
+  const grid = document.getElementById('catGrid');
+  if(!grid) return;
+  grid.addEventListener('scroll', updateCatChevrons, {passive:true});
+  updateCatChevrons();
+}
+
 /* ============ SCROLL REVEAL ============ */
 let revealObserver = null;
 function initScrollReveal(){
@@ -633,10 +671,14 @@ function renderHome(){
       <div class="searchbar" style="margin-bottom:16px;cursor:pointer;" onclick="navigate('/buscar')">
         <span>🔎</span><span style="color:var(--muted);font-size:14px;">Buscá tu comercio</span>
       </div>
-      <div class="cat-grid">
-        ${CATEGORIES.map(c=>`<div class="cat-chip" onclick="navigate('/categoria/${c.slug}')">
-          <div class="emoji">${c.emoji}</div><span class="label">${c.label}</span>
-        </div>`).join('')}
+      <div class="cat-grid-wrap">
+        <button class="scroll-chevron left is-hidden" id="catChevronLeft" onclick="scrollCatGrid(-1)" aria-label="Categorías anteriores">‹</button>
+        <div class="cat-grid" id="catGrid">
+          ${CATEGORIES.map(c=>`<div class="cat-chip" onclick="navigate('/categoria/${c.slug}')">
+            <div class="emoji">${c.emoji}</div><span class="label">${c.label}</span>
+          </div>`).join('')}
+        </div>
+        <button class="scroll-chevron right" id="catChevronRight" onclick="scrollCatGrid(1)" aria-label="Más categorías">›</button>
       </div>
     </div>
 
@@ -658,6 +700,7 @@ function renderHome(){
     </div>
   `;
   setupHomePanelFade();
+  setupCatChevrons();
   initScrollReveal();
 }
 
