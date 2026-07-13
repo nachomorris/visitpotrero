@@ -2,930 +2,365 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Visit Potrero — Panel de edición</title>
-<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de admin — Visit Potrero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 <style>
-  :root{
-    --primary:#A3E635;
-    --primary-dark:#65A30D;
-    --primary-light:#ECFCCB;
-    --ink:#111111;
-    --muted:#6b7280;
-    --bg:#F7F8F3;
-    --card:#ffffff;
-    --border:#E7E7E2;
-    --radius:14px;
-    --shadow:0 2px 10px rgba(17,17,17,.06);
-    --danger:#dc2626;
-    --danger-light:#fee2e2;
+  .container { max-width: 640px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--card); color: var(--muted); font-size: 13px; font-weight: 700;
+    cursor: pointer; box-shadow: var(--shadow);
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;
-    padding-bottom:60px;
-  }
-  a{color:inherit;}
-  button{font-family:inherit;cursor:pointer;}
-  input,select,textarea{font-family:inherit;}
-
-  header.topbar{
-    position:sticky;top:0;z-index:30;background:var(--ink);color:#fff;
-    padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    box-shadow:0 4px 14px rgba(0,0,0,.15);
-  }
-  header.topbar .title{display:flex;align-items:center;gap:10px;}
-  header.topbar .title .logo{
-    width:32px;height:32px;border-radius:50%;background:var(--primary);color:var(--ink);
-    display:flex;align-items:center;justify-content:center;font-size:15px;
-  }
-  header.topbar h1{font-size:15px;margin:0;font-weight:800;}
-  header.topbar .sub{font-size:11px;opacity:.7;font-weight:500;}
-  header.topbar .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .btn{
-    border:none;border-radius:10px;padding:9px 16px;font-size:12.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-  }
-  .btn-primary{background:var(--primary);color:var(--ink);}
-  .btn-primary:hover{filter:brightness(1.05);}
-  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;}
-  .btn-ghost:hover{background:rgba(255,255,255,.2);}
-  .btn-outline{background:#fff;color:var(--ink);border:1px solid var(--border);}
-  .btn-outline:hover{background:var(--bg);}
-  .btn-danger{background:var(--danger-light);color:var(--danger);}
-  .btn-danger:hover{background:#fecaca;}
-  .btn-sm{padding:6px 11px;font-size:11.5px;border-radius:8px;}
-
-  .wrap{max-width:1040px;margin:0 auto;padding:20px 20px 40px;}
-
-  .banner{
-    background:var(--primary-light);border:1px solid #D9F99D;color:var(--primary-dark);
-    border-radius:var(--radius);padding:14px 16px;font-size:12.5px;line-height:1.55;margin-bottom:20px;
-  }
-  .banner b{color:var(--ink);}
-  .banner .steps{margin:8px 0 0;padding-left:18px;}
-  .banner .steps li{margin-bottom:3px;}
-
-  .draft-status{
-    display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap;
-  }
-  .draft-status .dot{width:7px;height:7px;border-radius:50%;background:var(--primary-dark);flex:none;}
-  .draft-status button{background:none;border:none;color:var(--primary-dark);font-weight:700;font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0;}
-
-  .tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:2px;}
-  .tab-btn{
-    flex:none;border:1px solid var(--border);background:var(--card);border-radius:20px;padding:9px 16px;
-    font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;
-  }
-  .tab-btn.active{background:var(--ink);border-color:var(--ink);color:var(--primary);}
-
-  .section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
-  .section-title h2{font-size:17px;margin:0;}
-  .section-title .count{font-size:11.5px;color:var(--muted);font-weight:600;}
-
-  .list{display:flex;flex-direction:column;gap:10px;}
-  .row-card{
-    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-    padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);
-  }
-  .row-card .row-thumb{
-    width:46px;height:46px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
-    font-size:20px;color:#fff;overflow:hidden;
-  }
-  .row-card .row-thumb img{width:100%;height:100%;object-fit:cover;}
-  .row-card .row-info{flex:1;min-width:0;}
-  .row-card .row-name{font-size:13.5px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-  .row-card .row-meta{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .row-card .row-actions{display:flex;gap:6px;flex:none;}
-  .pill-tag{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--border);}
-  .pill-tag.top{background:var(--ink);color:var(--primary);border-color:var(--ink);}
-  .pill-tag.featured{background:var(--primary);color:var(--ink);border-color:var(--primary);}
-  .pill-tag.closed{color:var(--danger);}
-
-  .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 20px;background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);}
-
-  /* Formulario (modal) */
-  .modal-backdrop{
-    position:fixed;inset:0;background:rgba(17,17,17,.45);z-index:50;display:flex;align-items:flex-start;
-    justify-content:center;padding:26px 16px;overflow-y:auto;
-  }
-  .modal{
-    background:#fff;border-radius:18px;max-width:560px;width:100%;padding:22px 22px 20px;box-shadow:0 20px 50px rgba(0,0,0,.25);
-  }
-  .modal h3{margin:0 0 4px;font-size:16px;}
-  .modal .modal-sub{font-size:11.5px;color:var(--muted);margin-bottom:16px;}
-  .field{margin-bottom:13px;}
-  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:5px;}
-  .field .hint{font-weight:500;color:var(--muted);font-size:10.5px;margin-left:4px;}
-  .field input[type=text], .field input[type=url], .field input[type=number], .field input[type=tel], .field select, .field textarea{
-    width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--ink);background:#fff;
-  }
-  .field textarea{resize:vertical;min-height:60px;}
-  .field-row{display:flex;gap:10px;}
-  .field-row .field{flex:1;}
-  .checks{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px;}
-  .check-item{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;}
-  .check-item input{width:16px;height:16px;accent-color:var(--primary-dark);}
-  .modal-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
-  .color-row{display:flex;align-items:center;gap:8px;}
-  .color-row input[type=color]{width:36px;height:32px;border:1px solid var(--border);border-radius:8px;padding:2px;background:#fff;}
-
-  @media (max-width:560px){
-    header.topbar{padding:12px 14px;}
-    .wrap{padding:16px 14px 32px;}
-    .row-card{flex-wrap:wrap;}
-    .row-card .row-actions{width:100%;justify-content:flex-end;}
-  }
+  .tab.active { background: var(--ink); color: var(--primary); border-color: var(--ink); }
+  .admin-card { margin-bottom: 14px; }
+  .admin-card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .admin-card .name { font-weight: 800; font-size: 17px; margin-bottom: 2px; }
+  .admin-card .cat { font-size: 13px; color: var(--primary-dark); font-weight: 600; margin-bottom: 10px; }
+  .admin-card dl { margin: 10px 0 0; font-size: 14px; }
+  .admin-card dt { color: var(--muted); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: .02em; }
+  .admin-card dd { margin: 2px 0 0; }
+  .admin-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="title">
-    <div class="logo">🏔️</div>
-    <div>
-      <h1>Visit Potrero</h1>
-      <div class="sub">Panel de edición de datos</div>
+<div class="topbar">
+  <div class="brand">Visit<span>Potrero</span> <span style="font-size:12px; color:rgba(255,255,255,.6); font-weight:400;">· admin</span></div>
+  <div style="display:flex; gap:14px; align-items:center;">
+    <a href="importar.html" class="btn-icon" style="text-decoration:none;">Importar catálogo</a>
+    <a href="panel.html" class="btn-icon" style="text-decoration:none;">Mi panel</a>
+    <button class="btn-icon" id="logoutBtn">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="alert" class="alert"></div>
+
+  <div class="section-tabs">
+    <button id="mainTabBusinesses" class="active">🏪 Comercios</button>
+    <button id="mainTabEvents">🎉 Eventos</button>
+  </div>
+
+  <div id="businessesSection">
+
+  <div id="listView">
+    <div class="tabs">
+      <button class="tab active" data-status="pending">Pendientes</button>
+      <button class="tab" data-status="published">Publicadas</button>
+      <button class="tab" data-status="rejected">Rechazadas</button>
+      <button class="tab" data-status="all">Todas</button>
+    </div>
+
+    <div id="list">
+      <p class="empty-state">Cargando...</p>
     </div>
   </div>
-  <div class="actions">
-    <a class="btn btn-ghost" href="visit-potrero.html" target="_blank" rel="noopener">Vista previa ↗</a>
-    <button class="btn btn-primary" onclick="downloadDataJs()">⬇ Descargar data.js</button>
+
+  <div id="formView" class="hidden">
+    <div class="card">
+      <h2>Editar ficha</h2>
+
+      <form id="businessForm">
+        <input type="hidden" id="business_id">
+
+        <label for="name">Nombre del comercio *</label>
+        <input type="text" id="name" required>
+
+        <label for="category_id">Categoría *</label>
+        <select id="category_id" required>
+          <option value="">Seleccioná una categoría</option>
+        </select>
+
+        <label for="subcategory_id">Subcategoría</label>
+        <select id="subcategory_id">
+          <option value="">(opcional)</option>
+        </select>
+
+        <label for="description">Descripción</label>
+        <textarea id="description"></textarea>
+
+        <label for="address">Dirección</label>
+        <input type="text" id="address">
+
+        <label for="hours">Horarios</label>
+        <input type="text" id="hours">
+
+        <div class="row-2">
+          <div>
+            <label for="phone">Teléfono</label>
+            <input type="tel" id="phone">
+          </div>
+          <div>
+            <label for="whatsapp">WhatsApp</label>
+            <input type="tel" id="whatsapp">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="instagram">Instagram</label>
+            <input type="text" id="instagram">
+          </div>
+          <div>
+            <label for="website">Sitio web</label>
+            <input type="text" id="website">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email">
+          </div>
+          <div>
+            <label for="facebook">Facebook</label>
+            <input type="text" id="facebook">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="lat">Latitud</label>
+            <input type="text" id="lat">
+          </div>
+          <div>
+            <label for="lng">Longitud</label>
+            <input type="text" id="lng">
+          </div>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:8px; margin-top:20px;">
+          <input type="checkbox" id="open_now" style="width:auto;" checked>
+          <span style="font-weight:600; color:var(--muted); font-size:14px;">Actualmente abierto</span>
+        </label>
+
+        <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+          <input type="checkbox" id="featured" style="width:auto;">
+          <span style="font-weight:600; color:var(--muted); font-size:14px;">Destacado</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary" id="saveBtn">Guardar cambios</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+      </form>
+    </div>
   </div>
-</header>
 
-<div class="wrap">
-
-  <div class="banner">
-    Acá editás todo el contenido de la guía (comercios, lugares, eventos y novedades). Los cambios se van
-    guardando solos en este navegador mientras trabajás, pero <b>no se publican solos</b>: cuando termines,
-    descargá el archivo actualizado y reemplazalo en tu repositorio de GitHub.
-    <ol class="steps">
-      <li>Editá lo que necesites acá abajo (se guarda automáticamente en este navegador).</li>
-      <li>Tocá <b>"Descargar data.js"</b> arriba a la derecha.</li>
-      <li>Subí ese archivo a tu repositorio de GitHub, reemplazando al <code>data.js</code> actual (arrastrándolo, igual que hiciste con <code>visit-potrero.html</code>).</li>
-    </ol>
   </div>
+  <!-- fin businessesSection -->
 
-  <div class="draft-status" id="draftStatus"></div>
+  <!-- ===== SECCIÓN EVENTOS (admin) ===== -->
+  <div id="eventsAdminSection" class="hidden">
 
-  <div class="tabs" id="tabs"></div>
-  <div id="content"></div>
+    <div id="eventsAdminListView">
+      <div class="tabs" id="evAdminStatusTabs">
+        <button class="tab active" data-evstatus="pending">Pendientes</button>
+        <button class="tab" data-evstatus="needs_changes">Con cambios pedidos</button>
+        <button class="tab" data-evstatus="published">Publicados</button>
+        <button class="tab" data-evstatus="featured">Destacados</button>
+        <button class="tab" data-evstatus="finished">Finalizados</button>
+        <button class="tab" data-evstatus="hidden">Ocultos</button>
+        <button class="tab" data-evstatus="rejected">Rechazados</button>
+        <button class="tab" data-evstatus="all">Todos</button>
+      </div>
+
+      <div class="row-2" style="margin-bottom:10px;">
+        <select id="evAdminCategoryFilter">
+          <option value="">Todas las categorías</option>
+        </select>
+        <input type="text" id="evAdminOrgSearch" placeholder="Buscar por organizador o título...">
+      </div>
+      <input type="date" id="evAdminDateFilter" style="margin-bottom:14px;">
+
+      <button class="btn btn-primary btn-small" id="newOfficialEventBtn" style="margin-bottom:14px;">+ Crear evento oficial</button>
+
+      <div id="evAdminList">
+        <p class="empty-state">Cargando...</p>
+      </div>
+    </div>
+
+    <div id="eventsAdminFormView" class="hidden">
+      <div class="card">
+        <h2 id="evAdminFormTitle">Editar evento</h2>
+
+        <form id="evAdminForm">
+          <input type="hidden" id="evad_id">
+
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="evad_is_official" style="width:auto;">
+            <span style="font-weight:600; color:var(--muted); font-size:14px;">Evento oficial (municipal, sin ficha organizadora)</span>
+          </label>
+
+          <label for="evad_business_id">Ficha organizadora</label>
+          <select id="evad_business_id">
+            <option value="">(sin ficha / evento oficial)</option>
+          </select>
+
+          <label for="evad_title">Título del evento *</label>
+          <input type="text" id="evad_title" required>
+
+          <label for="evad_short_description">Descripción corta</label>
+          <input type="text" id="evad_short_description" maxlength="140">
+
+          <label for="evad_description">Descripción completa</label>
+          <textarea id="evad_description"></textarea>
+
+          <label for="evad_category_id">Categoría *</label>
+          <select id="evad_category_id" required>
+            <option value="">Seleccioná una categoría</option>
+          </select>
+
+          <label for="evad_cover_image">Imagen de portada (URL)</label>
+          <input type="text" id="evad_cover_image">
+
+          <label for="evad_gallery">Galería (URLs separadas por coma)</label>
+          <input type="text" id="evad_gallery">
+
+          <div class="row-2">
+            <div>
+              <label for="evad_start_date">Fecha de inicio *</label>
+              <input type="date" id="evad_start_date" required>
+            </div>
+            <div>
+              <label for="evad_end_date">Fecha de finalización *</label>
+              <input type="date" id="evad_end_date" required>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div>
+              <label for="evad_start_time">Horario de inicio</label>
+              <input type="time" id="evad_start_time">
+            </div>
+            <div>
+              <label for="evad_end_time">Horario de finalización</label>
+              <input type="time" id="evad_end_time">
+            </div>
+          </div>
+
+          <label for="evad_address">Dirección</label>
+          <input type="text" id="evad_address">
+
+          <div class="row-2">
+            <div>
+              <label for="evad_lat">Latitud</label>
+              <input type="text" id="evad_lat">
+            </div>
+            <div>
+              <label for="evad_lng">Longitud</label>
+              <input type="text" id="evad_lng">
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div>
+              <label for="evad_phone">Teléfono</label>
+              <input type="tel" id="evad_phone">
+            </div>
+            <div>
+              <label for="evad_whatsapp">WhatsApp</label>
+              <input type="tel" id="evad_whatsapp">
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div>
+              <label for="evad_instagram">Instagram</label>
+              <input type="text" id="evad_instagram">
+            </div>
+            <div>
+              <label for="evad_website">Sitio web</label>
+              <input type="text" id="evad_website">
+            </div>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; margin-top:20px;">
+            <input type="checkbox" id="evad_is_free" style="width:auto;">
+            <span style="font-weight:600; color:var(--muted); font-size:14px;">Entrada gratuita</span>
+          </label>
+          <div id="evad_price_wrap">
+            <label for="evad_price">Precio</label>
+            <input type="number" id="evad_price" min="0">
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+            <input type="checkbox" id="evad_requires_registration" style="width:auto;">
+            <span style="font-weight:600; color:var(--muted); font-size:14px;">Requiere inscripción</span>
+          </label>
+          <div id="evad_registration_wrap" class="hidden">
+            <label for="evad_registration_url">Enlace de inscripción</label>
+            <input type="text" id="evad_registration_url">
+          </div>
+
+          <label for="evad_capacity">Capacidad (opcional)</label>
+          <input type="number" id="evad_capacity" min="1">
+
+          <label for="evad_tags">Etiquetas</label>
+          <input type="text" id="evad_tags" placeholder="separadas por coma">
+
+          <label for="evad_recurrence_type">Repetición</label>
+          <select id="evad_recurrence_type">
+            <option value="none">No se repite</option>
+            <option value="weekly_fri">Todos los viernes</option>
+            <option value="weekly_sat">Todos los sábados</option>
+            <option value="weekend">Todos los fines de semana</option>
+            <option value="weekly">Una vez por semana</option>
+            <option value="custom">Fechas específicas</option>
+          </select>
+          <div id="evad_recurrence_until_wrap" class="hidden">
+            <label for="evad_recurrence_until">Repetir hasta</label>
+            <input type="date" id="evad_recurrence_until">
+          </div>
+          <div id="evad_recurrence_custom_wrap" class="hidden">
+            <label for="evad_recurrence_dates">Fechas puntuales (una por línea, AAAA-MM-DD)</label>
+            <textarea id="evad_recurrence_dates"></textarea>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--border); margin:22px 0;">
+
+          <label for="evad_status">Estado</label>
+          <select id="evad_status">
+            <option value="draft">Borrador</option>
+            <option value="pending">Pendiente de revisión</option>
+            <option value="approved">Aprobado</option>
+            <option value="published">Publicado</option>
+            <option value="needs_changes">Requiere modificaciones</option>
+            <option value="rejected">Rechazado</option>
+            <option value="finished">Finalizado</option>
+            <option value="hidden">Oculto</option>
+          </select>
+
+          <label for="evad_review_note">Observación para el organizador (visible para él)</label>
+          <textarea id="evad_review_note" placeholder="Ej: falta la foto de portada, corregí el horario..."></textarea>
+
+          <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+            <input type="checkbox" id="evad_is_featured" style="width:auto;">
+            <span style="font-weight:600; color:var(--muted); font-size:14px;">Destacado (aparece en el carrusel superior de la Agenda)</span>
+          </label>
+          <div id="evad_featured_order_wrap">
+            <label for="evad_featured_order">Orden entre destacados (menor = primero)</label>
+            <input type="number" id="evad_featured_order" value="0">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="evAdminSaveBtn">Guardar evento</button>
+          <button type="button" class="btn btn-secondary" id="evAdminCancelBtn">Cancelar</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+  <!-- fin eventsAdminSection -->
 
 </div>
 
-<div id="modalRoot"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/admin-events.js"></script>
 
-<script src="data.js"></script>
-<script>
-/* ============ ESTADO ============ */
-let activeTab = 'comercios';
-const DRAFT_KEY = 'visitPotreroDraft';
-
-function currentState(){
-  return { CATEGORIES, PLACES, BUSINESSES, EVENTS, NOVEDADES };
-}
-
-function loadDraftIfAny(){
-  try{
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if(!raw) return false;
-    const draft = JSON.parse(raw);
-    if(draft.CATEGORIES) CATEGORIES.splice(0, CATEGORIES.length, ...draft.CATEGORIES);
-    if(draft.PLACES) PLACES.splice(0, PLACES.length, ...draft.PLACES);
-    if(draft.BUSINESSES) BUSINESSES.splice(0, BUSINESSES.length, ...draft.BUSINESSES);
-    if(draft.EVENTS) EVENTS.splice(0, EVENTS.length, ...draft.EVENTS);
-    if(draft.NOVEDADES) NOVEDADES.splice(0, NOVEDADES.length, ...draft.NOVEDADES);
-    return true;
-  }catch(e){ return false; }
-}
-
-let lastSavedAt = null;
-function saveDraft(){
-  localStorage.setItem(DRAFT_KEY, JSON.stringify(currentState()));
-  lastSavedAt = new Date();
-  renderDraftStatus();
-}
-function discardDraft(){
-  if(!confirm('¿Descartar los cambios guardados en este navegador y volver a los datos originales de data.js? Esto no se puede deshacer.')) return;
-  localStorage.removeItem(DRAFT_KEY);
-  location.reload();
-}
-function renderDraftStatus(){
-  const el = document.getElementById('draftStatus');
-  const hasDraft = !!localStorage.getItem(DRAFT_KEY);
-  if(!hasDraft){
-    el.innerHTML = `<span style="color:var(--muted)">Todavía no hiciste cambios en esta sesión.</span>`;
-    return;
-  }
-  const time = lastSavedAt ? lastSavedAt.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}) : '';
-  el.innerHTML = `<span class="dot"></span> Borrador guardado en este navegador${time ? ' · '+time : ''} <button onclick="discardDraft()">Descartar y empezar de nuevo</button>`;
-}
-
-/* ============ UTILIDADES ============ */
-// Devuelve las subcategorías de un comercio como array, sin importar si
-// vienen en el campo nuevo (subcategories: []) o en el viejo (subcategory: '').
-function subcatsOf(b){
-  if(Array.isArray(b.subcategories)) return b.subcategories.filter(Boolean);
-  if(b.subcategory) return [b.subcategory];
-  return [];
-}
-function slugify(str){
-  return (str || '')
-    .toString().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .trim()
-    .replace(/[^a-z0-9]+/g,'-')
-    .replace(/(^-+|-+$)/g,'') || 'item';
-}
-function uniqueId(base, list, excludeId){
-  const ids = list.map(x=>x.id).filter(id=>id!==excludeId);
-  let id = slugify(base);
-  let out = id, n = 2;
-  while(ids.includes(out)){ out = id + '-' + n; n++; }
-  return out;
-}
-function esc(s){
-  return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-/* ============ TABS ============ */
-const TABS = [
-  {key:'comercios', label:'Comercios'},
-  {key:'lugares', label:'Lugares para visitar'},
-  {key:'eventos', label:'Eventos'},
-  {key:'novedades', label:'Novedades'},
-  {key:'categorias', label:'Categorías'},
-];
-function renderTabs(){
-  document.getElementById('tabs').innerHTML = TABS.map(t=>
-    `<button class="tab-btn ${activeTab===t.key?'active':''}" onclick="setTab('${t.key}')">${t.label}</button>`
-  ).join('');
-}
-function setTab(key){ activeTab = key; renderTabs(); renderContent(); }
-
-function renderContent(){
-  const el = document.getElementById('content');
-  if(activeTab==='comercios'){ el.innerHTML = renderComerciosList(); renderComerciosItems(); return; }
-  if(activeTab==='lugares') return el.innerHTML = renderLugaresList();
-  if(activeTab==='eventos') return el.innerHTML = renderEventList(EVENTS, 'eventos', 'Eventos');
-  if(activeTab==='novedades') return el.innerHTML = renderEventList(NOVEDADES, 'novedades', 'Novedades');
-  if(activeTab==='categorias') return el.innerHTML = renderCategoriasList();
-}
-
-/* ============ COMERCIOS ============ */
-let comerciosFilterCat = 'all';
-let comerciosFilterQ = '';
-
-function renderComerciosList(){
-  const filterPills = ['all', ...CATEGORIES.map(c=>c.slug)].map(slug=>{
-    const label = slug==='all' ? 'Todas' : cat(slug).emoji+' '+cat(slug).label;
-    return `<button class="tab-btn ${comerciosFilterCat===slug?'active':''}" onclick="setComerciosFilterCat('${slug}')">${label}</button>`;
-  }).join('');
-  return `
-    <div class="section-title">
-      <h2>Comercios <span class="count" id="comerciosCount"></span></h2>
-      <button class="btn btn-primary btn-sm" onclick="openComercioForm()">+ Agregar comercio</button>
-    </div>
-    <div class="field" style="max-width:320px;">
-      <input type="text" id="comerciosSearchInput" placeholder="Buscar por nombre o dirección..." value="${esc(comerciosFilterQ)}" oninput="comerciosFilterQ=this.value; renderComerciosItems();">
-    </div>
-    <div class="tabs" style="margin-bottom:16px;">${filterPills}</div>
-    <div class="list" id="comerciosItems"></div>
-  `;
-}
-
-function renderComerciosItems(){
-  const items = BUSINESSES.filter(b=>{
-    const matchCat = comerciosFilterCat==='all' || b.category===comerciosFilterCat;
-    const q = comerciosFilterQ.trim().toLowerCase();
-    const matchQ = !q || b.name.toLowerCase().includes(q) || b.address.toLowerCase().includes(q);
-    return matchCat && matchQ;
-  });
-  const countEl = document.getElementById('comerciosCount');
-  if(countEl) countEl.textContent = `(${items.length} de ${BUSINESSES.length})`;
-  document.getElementById('comerciosItems').innerHTML = items.length ? items.map(b=>{
-    const c = cat(b.category);
-    return `<div class="row-card">
-      <div class="row-thumb" style="background:${c.color}">${b.photo ? `<img src="${esc(b.photo)}">` : c.emoji}</div>
-      <div class="row-info">
-        <div class="row-name">${esc(b.name)}
-          ${b.top?'<span class="pill-tag top">★ TOP</span>':''}
-          ${b.featured?'<span class="pill-tag featured">☆ Destacado</span>':''}
-          <span class="pill-tag ${b.open?'':'closed'}">${b.open?'Abierto':'Cerrado'}</span>
-        </div>
-        <div class="row-meta">${c.emoji} ${c.label}${subcatsOf(b).length ? ' · '+esc(subcatsOf(b).join(', ')) : ''} · ${esc(b.address)}</div>
-      </div>
-      <div class="row-actions">
-        <button class="btn btn-outline btn-sm" onclick="openComercioForm('${b.id}')">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteComercio('${b.id}')">Borrar</button>
-      </div>
-    </div>`;
-  }).join('') : `<div class="empty">No hay comercios que coincidan con el filtro.</div>`;
-}
-
-function setComerciosFilterCat(slug){
-  comerciosFilterCat = slug;
-  renderContent(); // re-renderiza toda la sección para actualizar qué pill está activa
-}
-
-function openComercioForm(id){
-  const editing = !!id;
-  const b = editing ? BUSINESSES.find(x=>x.id===id) : {
-    name:'', category:CATEGORIES[0].slug, address:'', desc:'', phone:'', hours:'',
-    email:'', web:'', instagram:'', facebook:'',
-    open:true, top:false, featured:false, photo:'', lat:'', lng:''
-  };
-  formPhotoValue = b.photo || '';
-  previewOverrideSrc = '';
-  pendingPhotoBlob = null;
-  pendingPhotoFilename = '';
-  const html = `
-    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
-      <div class="modal">
-        <h3>${editing ? 'Editar comercio' : 'Nuevo comercio'}</h3>
-        <div class="modal-sub">${editing ? 'ID: '+esc(b.id) : 'Se genera un ID automáticamente a partir del nombre.'}</div>
-        <div class="field">
-          <label>Nombre *</label>
-          <input type="text" id="f_name" value="${esc(b.name)}" placeholder="Ej: Lo de Vito">
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Categoría *</label>
-            <select id="f_category" onchange="renderSubcategoryOptions(this.value, [])">
-              ${CATEGORIES.map(c=>`<option value="${c.slug}" ${b.category===c.slug?'selected':''}>${c.emoji} ${c.label}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field" id="f_subcategory_wrap"></div>
-        </div>
-        <div class="field">
-          <label>Dirección *</label>
-          <input type="text" id="f_address" value="${esc(b.address)}" placeholder="Calle, número, Potrero de los Funes, San Luis">
-        </div>
-        <div class="field">
-          <label>Descripción</label>
-          <textarea id="f_desc" placeholder="Una o dos líneas contando de qué se trata">${esc(b.desc)}</textarea>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Teléfono / WhatsApp</label>
-            <input type="tel" id="f_phone" value="${esc(b.phone)}" placeholder="+54 9 266 000-0000">
-          </div>
-          <div class="field">
-            <label>Horario</label>
-            <input type="text" id="f_hours" value="${esc(b.hours)}" placeholder="9:00 a 20:00">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Email <span class="hint">(opcional)</span></label>
-            <input type="email" id="f_email" value="${esc(b.email||'')}" placeholder="contacto@comercio.com">
-          </div>
-          <div class="field">
-            <label>Sitio web <span class="hint">(opcional)</span></label>
-            <input type="text" id="f_web" value="${esc(b.web||'')}" placeholder="https://...">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Instagram <span class="hint">(opcional)</span></label>
-            <input type="text" id="f_instagram" value="${esc(b.instagram||'')}" placeholder="@usuario  ó  https://instagram.com/usuario">
-          </div>
-          <div class="field">
-            <label>Facebook <span class="hint">(opcional)</span></label>
-            <input type="text" id="f_facebook" value="${esc(b.facebook||'')}" placeholder="nombre-de-página  ó  https://facebook.com/...">
-          </div>
-        </div>
-        <div class="field">
-          <label>Foto del comercio <span class="hint">(si no cargás una, se muestra una de ejemplo)</span></label>
-          <div id="photoPreviewWrap" style="margin-bottom:8px;"></div>
-          <input type="file" id="f_photo_file" accept="image/*" onchange="handlePhotoFile(event)">
-          <div id="photoDownloadHint" style="display:none;background:var(--primary-light);border:1px solid #D9F99D;border-radius:10px;padding:9px 11px;margin-top:8px;font-size:11px;line-height:1.5;color:var(--primary-dark);">
-            <b style="color:var(--ink)">Pasos:</b> 1) descargá la imagen optimizada
-            <button type="button" class="btn btn-outline btn-sm" style="margin:2px 4px;" onclick="downloadPendingPhoto()">⬇ Descargar imagen</button>
-            2) subila a la carpeta <code>images/</code> de tu repositorio en GitHub (junto a <code>data.js</code>), igual que hiciste con los otros archivos.
-          </div>
-          <div class="hint" style="display:block;margin:10px 0 4px;">— o escribí la ruta / link de una imagen que ya subiste —</div>
-          <input type="text" id="f_photo_path" value="${esc(formPhotoValue)}" placeholder="images/nombre-del-comercio.jpg  ó  https://..." onchange="formPhotoValue=this.value.trim(); previewOverrideSrc=''; updatePhotoPreview();">
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Latitud <span class="hint">(opcional)</span></label>
-            <input type="number" step="any" id="f_lat" value="${b.lat===''?'':b.lat}" placeholder="Se genera sola si la dejás vacía">
-          </div>
-          <div class="field">
-            <label>Longitud <span class="hint">(opcional)</span></label>
-            <input type="number" step="any" id="f_lng" value="${b.lng===''?'':b.lng}" placeholder="Se genera sola si la dejás vacía">
-          </div>
-        </div>
-        <div class="checks">
-          <label class="check-item"><input type="checkbox" id="f_open" ${b.open?'checked':''}> Abierto ahora</label>
-          <label class="check-item"><input type="checkbox" id="f_top" ${b.top?'checked':''}> ★ TOP</label>
-          <label class="check-item"><input type="checkbox" id="f_featured" ${b.featured?'checked':''}> ☆ Destacado (sale en "Descuentos imperdibles")</label>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-primary" onclick="saveComercio(${editing ? `'${b.id}'` : 'null'})">Guardar</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').innerHTML = html;
-  updatePhotoPreview();
-  renderSubcategoryOptions(b.category, subcatsOf(b));
-}
-
-function renderSubcategoryOptions(categorySlug, currentValues){
-  const wrap = document.getElementById('f_subcategory_wrap');
-  if(!wrap) return;
-  const list = (typeof SUBCATEGORIES !== 'undefined' && SUBCATEGORIES[categorySlug]) || [];
-  if(list.length){
-    // Lista predefinida: se pueden tildar varias.
-    wrap.innerHTML = `
-      <label>Subcategorías <span class="hint">(podés elegir más de una)</span></label>
-      <div class="checks" id="f_subcategory_checks">
-        ${list.map(sc=>`<label class="check-item"><input type="checkbox" value="${esc(sc)}" ${currentValues.includes(sc)?'checked':''}> ${esc(sc)}</label>`).join('')}
-      </div>
-    `;
-  } else {
-    // Sin lista predefinida: texto libre separado por comas, para poder poner varias.
-    wrap.innerHTML = `
-      <label>Subcategorías <span class="hint">(opcional, separadas por coma)</span></label>
-      <input type="text" id="f_subcategory_text" value="${esc(currentValues.join(', '))}" placeholder="Ej: Boutique, Almacén...">
-    `;
-  }
-}
-
-/* ---- Foto: la imagen se guarda como ARCHIVO en la carpeta images/ del repo, no adentro
-   de data.js (para que no se ponga pesado). El panel arma el archivo optimizado, vos lo
-   descargás y lo subís a GitHub; el campo del comercio solo guarda la ruta "images/xxx.jpg". ---- */
-let formPhotoValue = '';
-let previewOverrideSrc = '';
-let pendingPhotoBlob = null;
-let pendingPhotoFilename = '';
-
-function updatePhotoPreview(){
-  const wrap = document.getElementById('photoPreviewWrap');
-  if(!wrap) return;
-  const src = previewOverrideSrc || formPhotoValue;
-  wrap.innerHTML = src
-    ? `<div style="position:relative;display:inline-block;">
-         <img src="${src}" onerror="this.style.opacity=.25" style="width:130px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;background:var(--bg);">
-         <button type="button" onclick="removePhoto()" title="Quitar foto"
-           style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:2px solid #fff;font-size:12px;cursor:pointer;line-height:1;">✕</button>
-       </div>`
-    : `<div style="width:130px;height:96px;border-radius:10px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10.5px;text-align:center;padding:6px;">Sin foto propia<br>(se usa una de ejemplo)</div>`;
-}
-
-function removePhoto(){
-  formPhotoValue = '';
-  previewOverrideSrc = '';
-  pendingPhotoBlob = null;
-  pendingPhotoFilename = '';
-  const fileInput = document.getElementById('f_photo_file');
-  const pathInput = document.getElementById('f_photo_path');
-  const hint = document.getElementById('photoDownloadHint');
-  if(fileInput) fileInput.value = '';
-  if(pathInput) pathInput.value = '';
-  if(hint) hint.style.display = 'none';
-  updatePhotoPreview();
-}
-
-function processImageFile(file, maxDim, quality){
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onload = (e)=>{
-      const img = new Image();
-      img.onload = ()=>{
-        let w = img.width, h = img.height;
-        if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
-        else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        canvas.toBlob((blob)=>{
-          if(!blob){ reject(new Error('No se pudo generar la imagen')); return; }
-          resolve({dataUrl, blob});
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function handlePhotoFile(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  if(!file.type.startsWith('image/')){ alert('Elegí un archivo de imagen (jpg, png, etc).'); return; }
-  try{
-    const {dataUrl, blob} = await processImageFile(file, 900, 0.78);
-    const nameInput = document.getElementById('f_name');
-    const base = slugify((nameInput && nameInput.value.trim()) ? nameInput.value : ('foto-' + Date.now()));
-    pendingPhotoFilename = base + '.jpg';
-    pendingPhotoBlob = blob;
-    formPhotoValue = 'images/' + pendingPhotoFilename;
-    previewOverrideSrc = dataUrl;
-    const pathInput = document.getElementById('f_photo_path');
-    if(pathInput) pathInput.value = formPhotoValue;
-    const hint = document.getElementById('photoDownloadHint');
-    if(hint) hint.style.display = 'block';
-    updatePhotoPreview();
-  }catch(err){
-    alert('No se pudo procesar esa imagen. Probá con otra.');
-  }
-}
-
-function downloadPendingPhoto(){
-  if(!pendingPhotoBlob){ alert('Primero elegí una foto arriba.'); return; }
-  const url = URL.createObjectURL(pendingPhotoBlob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = pendingPhotoFilename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
-}
-
-function saveComercio(id){
-  const name = document.getElementById('f_name').value.trim();
-  const address = document.getElementById('f_address').value.trim();
-  if(!name || !address){ alert('Completá al menos el nombre y la dirección.'); return; }
-  const latVal = document.getElementById('f_lat').value;
-  const lngVal = document.getElementById('f_lng').value;
-  const subcatChecks = document.querySelectorAll('#f_subcategory_checks input[type=checkbox]:checked');
-  const subcatText = document.getElementById('f_subcategory_text');
-  let subcategories = [];
-  if(subcatChecks.length){
-    subcategories = [...subcatChecks].map(c=>c.value);
-  } else if(subcatText){
-    subcategories = subcatText.value.split(',').map(s=>s.trim()).filter(Boolean);
-  }
-  const data = {
-    name,
-    category: document.getElementById('f_category').value,
-    subcategories,
-    address,
-    desc: document.getElementById('f_desc').value.trim(),
-    phone: document.getElementById('f_phone').value.trim(),
-    hours: document.getElementById('f_hours').value.trim(),
-    email: document.getElementById('f_email').value.trim(),
-    web: document.getElementById('f_web').value.trim(),
-    instagram: document.getElementById('f_instagram').value.trim(),
-    facebook: document.getElementById('f_facebook').value.trim(),
-    photo: formPhotoValue.trim(),
-    open: document.getElementById('f_open').checked,
-    top: document.getElementById('f_top').checked,
-    featured: document.getElementById('f_featured').checked,
-  };
-  if(latVal !== '') data.lat = parseFloat(latVal);
-  if(lngVal !== '') data.lng = parseFloat(lngVal);
-
-  if(id){
-    const idx = BUSINESSES.findIndex(x=>x.id===id);
-    if(idx>-1) BUSINESSES[idx] = {...BUSINESSES[idx], ...data};
-  } else {
-    const newId = uniqueId(name, BUSINESSES);
-    const i = BUSINESSES.length;
-    if(data.lat===undefined) data.lat = jitter(CENTER[0], i, 0.03);
-    if(data.lng===undefined) data.lng = jitter(CENTER[1], i+7, 0.03);
-    BUSINESSES.push({id:newId, ...data});
-  }
-  closeModal();
-  saveDraft();
-  renderContent();
-}
-
-function deleteComercio(id){
-  const b = BUSINESSES.find(x=>x.id===id);
-  if(!b) return;
-  if(!confirm(`¿Borrar "${b.name}"? Esta acción no se puede deshacer.`)) return;
-  const idx = BUSINESSES.findIndex(x=>x.id===id);
-  BUSINESSES.splice(idx,1);
-  saveDraft();
-  renderContent();
-}
-
-/* ============ LUGARES PARA VISITAR ============ */
-function renderLugaresList(){
-  const items = PLACES;
-  return `
-    <div class="section-title">
-      <h2>Lugares para visitar <span class="count">(${items.length})</span></h2>
-      <button class="btn btn-primary btn-sm" onclick="openLugarForm()">+ Agregar lugar</button>
-    </div>
-    <div class="list">
-      ${items.length ? items.map(p=>`
-        <div class="row-card">
-          <div class="row-thumb" style="background:#16a34a">${p.emoji}</div>
-          <div class="row-info">
-            <div class="row-name">${esc(p.name)}</div>
-            <div class="row-meta">${esc(p.type)}</div>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-outline btn-sm" onclick="openLugarForm('${p.id}')">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteLugar('${p.id}')">Borrar</button>
-          </div>
-        </div>
-      `).join('') : `<div class="empty">Todavía no hay lugares cargados.</div>`}
-    </div>
-  `;
-}
-
-function openLugarForm(id){
-  const editing = !!id;
-  const p = editing ? PLACES.find(x=>x.id===id) : {name:'', type:'', emoji:'📍', desc:'', lat:'', lng:''};
-  const html = `
-    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
-      <div class="modal">
-        <h3>${editing ? 'Editar lugar' : 'Nuevo lugar para visitar'}</h3>
-        <div class="modal-sub">${editing ? 'ID: '+esc(p.id) : 'Se genera un ID automáticamente a partir del nombre.'}</div>
-        <div class="field-row">
-          <div class="field" style="flex:2">
-            <label>Nombre *</label>
-            <input type="text" id="f_name" value="${esc(p.name)}" placeholder="Ej: Paseo del Lago">
-          </div>
-          <div class="field" style="flex:0 0 80px">
-            <label>Ícono</label>
-            <input type="text" id="f_emoji" value="${esc(p.emoji)}" placeholder="🌉">
-          </div>
-        </div>
-        <div class="field">
-          <label>Tipo *</label>
-          <input type="text" id="f_type" value="${esc(p.type)}" placeholder="Ej: Peatonal, Parque recreativo, Mirador...">
-        </div>
-        <div class="field">
-          <label>Descripción</label>
-          <textarea id="f_desc" placeholder="Contá de qué se trata">${esc(p.desc)}</textarea>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Latitud <span class="hint">(opcional)</span></label>
-            <input type="number" step="any" id="f_lat" value="${p.lat===''?'':p.lat}">
-          </div>
-          <div class="field">
-            <label>Longitud <span class="hint">(opcional)</span></label>
-            <input type="number" step="any" id="f_lng" value="${p.lng===''?'':p.lng}">
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-primary" onclick="saveLugar(${editing ? `'${p.id}'` : 'null'})">Guardar</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').innerHTML = html;
-}
-
-function saveLugar(id){
-  const name = document.getElementById('f_name').value.trim();
-  const type = document.getElementById('f_type').value.trim();
-  if(!name || !type){ alert('Completá al menos el nombre y el tipo.'); return; }
-  const latVal = document.getElementById('f_lat').value;
-  const lngVal = document.getElementById('f_lng').value;
-  const data = {
-    name,
-    type,
-    emoji: document.getElementById('f_emoji').value.trim() || '📍',
-    desc: document.getElementById('f_desc').value.trim(),
-    lat: latVal !== '' ? parseFloat(latVal) : CENTER[0],
-    lng: lngVal !== '' ? parseFloat(lngVal) : CENTER[1],
-  };
-  if(id){
-    const idx = PLACES.findIndex(x=>x.id===id);
-    if(idx>-1) PLACES[idx] = {...PLACES[idx], ...data};
-  } else {
-    PLACES.push({id: uniqueId(name, PLACES), ...data});
-  }
-  closeModal();
-  saveDraft();
-  renderContent();
-}
-
-function deleteLugar(id){
-  const p = PLACES.find(x=>x.id===id);
-  if(!p) return;
-  if(!confirm(`¿Borrar "${p.name}"? Esta acción no se puede deshacer.`)) return;
-  PLACES.splice(PLACES.findIndex(x=>x.id===id),1);
-  saveDraft();
-  renderContent();
-}
-
-/* ============ EVENTOS / NOVEDADES ============ */
-function renderEventList(list, kind, label){
-  return `
-    <div class="section-title">
-      <h2>${label} <span class="count">(${list.length})</span></h2>
-      <button class="btn btn-primary btn-sm" onclick="openEventForm('${kind}')">+ Agregar</button>
-    </div>
-    <div class="list">
-      ${list.length ? list.map((e,i)=>`
-        <div class="row-card">
-          <div class="row-thumb" style="background:var(--ink);color:var(--primary);font-size:12px;font-weight:800;">${esc(e.date).slice(0,3)}</div>
-          <div class="row-info">
-            <div class="row-name">${esc(e.title)}</div>
-            <div class="row-meta">${esc(e.date)}</div>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-outline btn-sm" onclick="openEventForm('${kind}', ${i})">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteEvent('${kind}', ${i})">Borrar</button>
-          </div>
-        </div>
-      `).join('') : `<div class="empty">Todavía no hay nada cargado acá.</div>`}
-    </div>
-  `;
-}
-
-function openEventForm(kind, index){
-  const list = kind==='eventos' ? EVENTS : NOVEDADES;
-  const editing = index !== undefined;
-  const e = editing ? list[index] : {date:'', title:'', desc:''};
-  const html = `
-    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
-      <div class="modal">
-        <h3>${editing ? 'Editar' : 'Agregar'} ${kind==='eventos'?'evento':'novedad'}</h3>
-        <div class="field">
-          <label>Fecha *</label>
-          <input type="text" id="f_date" value="${esc(e.date)}" placeholder="Ej: 12 Jul 2026">
-        </div>
-        <div class="field">
-          <label>Título *</label>
-          <input type="text" id="f_title" value="${esc(e.title)}" placeholder="Título breve">
-        </div>
-        <div class="field">
-          <label>Descripción</label>
-          <textarea id="f_desc" placeholder="Detalle">${esc(e.desc)}</textarea>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-primary" onclick="saveEvent('${kind}', ${editing ? index : 'null'})">Guardar</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').innerHTML = html;
-}
-
-function saveEvent(kind, index){
-  const list = kind==='eventos' ? EVENTS : NOVEDADES;
-  const date = document.getElementById('f_date').value.trim();
-  const title = document.getElementById('f_title').value.trim();
-  if(!date || !title){ alert('Completá al menos la fecha y el título.'); return; }
-  const data = { date, title, desc: document.getElementById('f_desc').value.trim() };
-  if(index !== null && index !== undefined){ list[index] = data; }
-  else { list.push(data); }
-  closeModal();
-  saveDraft();
-  renderContent();
-}
-
-function deleteEvent(kind, index){
-  const list = kind==='eventos' ? EVENTS : NOVEDADES;
-  if(!confirm('¿Borrar este ítem? Esta acción no se puede deshacer.')) return;
-  list.splice(index,1);
-  saveDraft();
-  renderContent();
-}
-
-/* ============ CATEGORÍAS ============ */
-function renderCategoriasList(){
-  return `
-    <div class="section-title">
-      <h2>Categorías <span class="count">(${CATEGORIES.length})</span></h2>
-    </div>
-    <div class="banner" style="margin-bottom:14px;">
-      Estas son las categorías fijas de la guía. Podés cambiarles el nombre, el ícono o el color,
-      pero no se pueden agregar ni borrar categorías nuevas desde acá (afectaría a los comercios ya cargados).
-    </div>
-    <div class="list">
-      ${CATEGORIES.map((c,i)=>`
-        <div class="row-card">
-          <div class="row-thumb" style="background:${c.color}">${c.emoji}</div>
-          <div class="row-info">
-            <div class="row-name">${esc(c.label)}</div>
-            <div class="row-meta">${c.slug}</div>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-outline btn-sm" onclick="openCategoriaForm(${i})">Editar</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function openCategoriaForm(i){
-  const c = CATEGORIES[i];
-  const html = `
-    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
-      <div class="modal">
-        <h3>Editar categoría</h3>
-        <div class="modal-sub">ID interno: ${esc(c.slug)} (no se puede cambiar)</div>
-        <div class="field-row">
-          <div class="field" style="flex:2">
-            <label>Nombre *</label>
-            <input type="text" id="f_label" value="${esc(c.label)}">
-          </div>
-          <div class="field" style="flex:0 0 80px">
-            <label>Ícono</label>
-            <input type="text" id="f_emoji" value="${esc(c.emoji)}">
-          </div>
-        </div>
-        <div class="field">
-          <label>Color</label>
-          <div class="color-row">
-            <input type="color" id="f_color" value="${c.color}">
-            <span class="hint">Se usa en las tarjetas y en el mapa</span>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-primary" onclick="saveCategoria(${i})">Guardar</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('modalRoot').innerHTML = html;
-}
-
-function saveCategoria(i){
-  const label = document.getElementById('f_label').value.trim();
-  if(!label){ alert('Completá el nombre.'); return; }
-  CATEGORIES[i].label = label;
-  CATEGORIES[i].emoji = document.getElementById('f_emoji').value.trim() || CATEGORIES[i].emoji;
-  CATEGORIES[i].color = document.getElementById('f_color').value;
-  closeModal();
-  saveDraft();
-  renderContent();
-}
-
-/* ============ MODAL ============ */
-function closeModal(){ document.getElementById('modalRoot').innerHTML = ''; }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
-
-/* ============ DESCARGA data.js ============ */
-function buildDataJsText(){
-  const j = (v) => JSON.stringify(v, null, 2);
-  return `/* ==========================================================================
-   VISIT POTRERO — datos del sitio
-   Generado por el panel de edición (admin.html) el ${new Date().toLocaleString('es-AR')}.
-   Reemplazá el data.js de tu repositorio por este archivo para publicar los cambios.
-========================================================================== */
-
-const CATEGORIES = ${j(CATEGORIES)};
-
-const SUBCATEGORIES = ${j(typeof SUBCATEGORIES !== 'undefined' ? SUBCATEGORIES : {})};
-
-const CENTER = ${j(CENTER)}; // Potrero de los Funes, San Luis
-
-function cat(slug){ return CATEGORIES.find(c=>c.slug===slug) || CATEGORIES[0]; }
-function jitter(base, i, scale){ return base + ((i*37 % 100)/100 - .5) * scale; }
-
-const PLACES = ${j(PLACES)};
-
-const BUSINESSES = ${j(BUSINESSES)};
-
-// Coordenadas automáticas para los comercios que no tienen lat/lng propia.
-BUSINESSES.forEach((b,i)=>{
-  if(typeof b.lat !== 'number') b.lat = jitter(CENTER[0], i, 0.03);
-  if(typeof b.lng !== 'number') b.lng = jitter(CENTER[1], i+7, 0.03);
-});
-
-const EVENTS = ${j(EVENTS)};
-
-const NOVEDADES = ${j(NOVEDADES)};
-
-const SAMPLE_PHOTOS = ${j(SAMPLE_PHOTOS)};
-`;
-}
-
-function downloadDataJs(){
-  const text = buildDataJsText();
-  const blob = new Blob([text], {type:'text/javascript'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'data.js';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
-}
-
-/* ============ INIT ============ */
-loadDraftIfAny();
-renderDraftStatus();
-renderTabs();
-renderContent();
-</script>
 </body>
 </html>
